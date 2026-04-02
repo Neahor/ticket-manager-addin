@@ -251,15 +251,17 @@
       }
     });
 
-    // Capture full email body as plain text
-    item.body.getAsync(Office.CoercionType.Text, function(result) {
-      if (result.status === Office.AsyncResultStatus.Succeeded) {
-        emailData.body = result.value || "";
-        const preview = document.getElementById("emailPreview");
-        preview.textContent = emailData.body.trim() || "(No body)";
-      }
-    });
+// Capture full email body as plain text
+item.body.getAsync(Office.CoercionType.Text, function(result) {
+  const preview = document.getElementById("emailPreview");
+  if (result.status === Office.AsyncResultStatus.Succeeded) {
+    emailData.body = result.value || "";
+    preview.textContent = emailData.body.trim() || "(No body)";
+  } else {
+    emailData.body = "";
+    preview.textContent = "(Could not load email body)";
   }
+});
 
   function applyEmailData() {
     document.getElementById("emailSubject").textContent = emailData.subject;
