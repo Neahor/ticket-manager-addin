@@ -217,39 +217,62 @@
   let emailData = { subject:"", senderName:"", senderEmail:"", body:"", itemId:"", date:"" };
   let currentTicket = null;
 
-  Office.onReady(function(info) {
-    checkApi();
-    if (info.host === Office.HostType.Outlook) {
-      loadEmailInfo();
-    } else {
-      emailData = { subject:"Invoice not received #4821", senderName:"John Smith", senderEmail:"john@clientco.com", body:"Hi, I still haven't received the invoice for order #4821.", itemId:"FAKE-ID-123", date:new Date().toISOString() };
+Office.onReady(function(info) {
+  checkApi();
+  if (info.host === Office.HostType.Outlook) {
+    // Wait a moment for mailbox item to be ready
+    setTimeout(function() {
+      if (Office.context.mailbox.item) {
+        loadEmailInfo();
+      } else {
+        // Retry after another second
+        setTimeout(function() {
+          if (Office.context.mailbox.item) {
+            loadEmailInfo();
+          } else {
+            document.getElementById("emailSubject").textContent = "(No email selected)";
+            document.getElementById("emailPreview").textContent = "Please open an email first.";
+          }
+        }, 1000);
+      }
+    }, 500);
+  }
+});
+
+function loadEmailInfo() {
+  const item = Office.context.mailbox.item;
+  if (!item) {
+    document.getElementById("emailSubject").textContent = "(No email selected)";
+    document.getElementById("emailPreview").textContent = "Please open an email first.";
+    return;
+  }
+
+  emailData.subject = item.subject || "(No subject)";
+  emailData.itemId  = item.itemId  || "";
+  emailData.date    = item.dateTimeCreated ? item.dateTimeCreated.toISOString() : new Date().toISOString();
+
+  document.getElementById("emailSubject").textContent = emailData.subject;
+  document.getElementById("ticketTitle").value = emailData.subject;
+
+  item.from.getAsync(function(result) {
+    if (result.status === Office.AsyncResultStatus.Succeeded) {
+      emailData.senderName  = result.value.displayName  || "";
+      emailData.senderEmail = result.value.emailAddress || "";
       applyEmailData();
     }
   });
 
-  function loadEmailInfo() {
-    const item = Office.context.mailbox.item;
-
-    // Capture subject
-    emailData.subject = item.subject || "(No subject)";
-
-    // Capture item ID for reopening the email later
-    emailData.itemId = item.itemId || "";
-
-    // Capture date
-    emailData.date = item.dateTimeCreated ? item.dateTimeCreated.toISOString() : new Date().toISOString();
-
-    document.getElementById("emailSubject").textContent = emailData.subject;
-    document.getElementById("ticketTitle").value = emailData.subject;
-
-    // Capture sender
-    item.from.getAsync(function(result) {
-      if (result.status === Office.AsyncResultStatus.Succeeded) {
-        emailData.senderName  = result.value.displayName  || "";
-        emailData.senderEmail = result.value.emailAddress || "";
-        applyEmailData();
-      }
-    });
+  item.body.getAsync(Office.CoercionType.Text, function(result) {
+    const preview = document.getElementById("emailPreview");
+    if (result.status === Office.AsyncResultStatus.Succeeded) {
+      emailData.body = result.value || "";
+      preview.textContent = emailData.body.trim() || "(No body)";
+    } else {
+      emailData.body = "";
+      preview.textContent = "(Could not load email body)";
+    }
+  });
+}
 
 // Capture full email body as plain text
 item.body.getAsync(Office.CoercionType.Text, function(result) {
