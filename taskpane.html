@@ -14,6 +14,7 @@
       --green-light: #dff6dd;
       --orange: #d83b01;
       --orange-light: #fed9cc;
+      --purple: #7719aa;
       --gray-50: #f8f8f8;
       --gray-100: #f3f2f1;
       --gray-200: #edebe9;
@@ -23,252 +24,106 @@
       --gray-900: #201f1e;
       --radius: 4px;
       --font: 'Segoe UI', system-ui, sans-serif;
+
+      /* ⚙️ CHANGE THIS to your API server address */
+      --api-url: http://192.168.0.154:4000;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font);
-      font-size: 13px;
-      color: var(--gray-900);
-      background: #fff;
-      min-height: 100vh;
-    }
+    body { font-family: var(--font); font-size: 13px; color: var(--gray-900); background: #fff; }
 
-    /* Header */
-    .header {
-      background: var(--blue);
-      color: #fff;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .header-icon {
-      width: 28px; height: 28px;
-      background: rgba(255,255,255,0.2);
-      border-radius: var(--radius);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px;
-    }
+    .header { background: var(--blue); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+    .header-icon { width: 28px; height: 28px; background: rgba(255,255,255,0.2); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 15px; }
     .header h1 { font-size: 14px; font-weight: 600; }
     .header p { font-size: 11px; opacity: 0.85; }
 
-    /* Email info bar */
-    .email-bar {
-      background: var(--gray-50);
-      border-bottom: 1px solid var(--gray-200);
-      padding: 10px 16px;
-    }
-    .email-subject {
-      font-weight: 600;
-      font-size: 12px;
-      color: var(--gray-900);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-bottom: 3px;
-    }
-    .email-from {
-      font-size: 11px;
-      color: var(--gray-600);
-    }
+    .email-bar { background: var(--gray-50); border-bottom: 1px solid var(--gray-200); padding: 10px 16px; }
+    .email-subject { font-weight: 600; font-size: 12px; color: var(--gray-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+    .email-meta { font-size: 11px; color: var(--gray-600); }
 
-    /* Tabs */
-    .tabs {
-      display: flex;
-      border-bottom: 1px solid var(--gray-200);
-      background: #fff;
-    }
-    .tab {
-      flex: 1;
-      padding: 9px 0;
-      font-size: 12px;
-      font-weight: 500;
-      text-align: center;
-      cursor: pointer;
-      color: var(--gray-600);
-      border-bottom: 2px solid transparent;
-      transition: all 0.15s;
-    }
-    .tab.active {
-      color: var(--blue);
-      border-bottom-color: var(--blue);
-    }
+    .tabs { display: flex; border-bottom: 1px solid var(--gray-200); background: #fff; }
+    .tab { flex: 1; padding: 9px 0; font-size: 12px; font-weight: 500; text-align: center; cursor: pointer; color: var(--gray-600); border-bottom: 2px solid transparent; transition: all 0.15s; }
+    .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
     .tab:hover:not(.active) { background: var(--gray-100); }
 
-    /* Panels */
     .panel { display: none; padding: 14px 16px; }
     .panel.active { display: block; }
 
-    /* Form */
     .field { margin-bottom: 12px; }
-    label {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--gray-600);
-      margin-bottom: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-    input[type="text"], select, textarea {
-      width: 100%;
-      padding: 6px 8px;
-      border: 1px solid var(--gray-300);
-      border-radius: var(--radius);
-      font-family: var(--font);
-      font-size: 12px;
-      color: var(--gray-900);
-      background: #fff;
-      transition: border-color 0.1s;
-    }
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--blue);
-      box-shadow: 0 0 0 1px var(--blue);
-    }
+    label { display: block; font-size: 11px; font-weight: 600; color: var(--gray-600); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+    input[type="text"], select, textarea { width: 100%; padding: 6px 8px; border: 1px solid var(--gray-300); border-radius: var(--radius); font-family: var(--font); font-size: 12px; color: var(--gray-900); background: #fff; transition: border-color 0.1s; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
     textarea { resize: vertical; min-height: 70px; }
-
-    .ticket-number-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .ticket-number-row input { flex: 1; font-weight: 600; font-size: 13px; }
-    .btn-gen {
-      padding: 6px 10px;
-      background: var(--gray-100);
-      border: 1px solid var(--gray-300);
-      border-radius: var(--radius);
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      color: var(--gray-900);
-    }
-    .btn-gen:hover { background: var(--gray-200); }
 
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-    /* Priority badges */
-    .priority-select { appearance: none; }
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-    }
+    /* Sender info box */
+    .sender-box { background: var(--blue-light); border: 1px solid #b3d6f0; border-radius: var(--radius); padding: 8px 10px; margin-bottom: 12px; font-size: 11px; }
+    .sender-box strong { color: var(--blue-dark); display: block; margin-bottom: 2px; }
+    .sender-box span { color: var(--gray-600); }
+
+    /* Assignee avatars */
+    .assignees { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+    .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; transition: all 0.1s; position: relative; }
+    .avatar:nth-child(2) { background: var(--purple); }
+    .avatar:nth-child(3) { background: var(--green); }
+    .avatar:nth-child(4) { background: var(--orange); }
+    .avatar:nth-child(5) { background: #008575; }
+    .avatar.selected { border-color: var(--gray-900); box-shadow: 0 0 0 1px var(--gray-900); }
+    .avatar-name { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; color: var(--gray-600); white-space: nowrap; }
+
+    /* Buttons */
+    .btn-primary { width: 100%; padding: 9px; background: var(--blue); color: #fff; border: none; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 6px; transition: background 0.15s; }
+    .btn-primary:hover { background: var(--blue-dark); }
+    .btn-primary:disabled { background: var(--gray-300); cursor: not-allowed; }
+
+    /* Toast */
+    .toast { display: none; border-radius: var(--radius); padding: 10px 12px; font-size: 12px; margin-top: 10px; align-items: center; gap: 8px; }
+    .toast.success { background: var(--green-light); border: 1px solid #bad3b7; border-left: 3px solid var(--green); color: #0a4d0a; }
+    .toast.error { background: #fde7e9; border: 1px solid #f1c0c3; border-left: 3px solid #a4262c; color: #6b0f0f; }
+    .toast.show { display: flex; }
+
+    /* API config notice */
+    .config-notice { background: #fff4ce; border: 1px solid #f0d060; border-left: 3px solid #d4a800; border-radius: var(--radius); padding: 8px 10px; font-size: 11px; color: #5c4400; margin-bottom: 12px; }
+
+    /* Ticket list */
+    .search-row { display: flex; gap: 6px; margin-bottom: 8px; }
+    .search-row input { flex: 1; }
+    .filter-row { display: flex; gap: 6px; margin-bottom: 10px; }
+    .filter-row select { flex: 1; font-size: 11px; padding: 4px 6px; }
+
+    .ticket-list { display: flex; flex-direction: column; gap: 6px; }
+    .ticket-card { border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 10px 12px; cursor: pointer; transition: all 0.1s; background: #fff; }
+    .ticket-card:hover { border-color: var(--blue); background: var(--blue-light); }
+    .ticket-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+    .ticket-id { font-size: 11px; font-weight: 700; color: var(--blue); }
+    .ticket-title { font-size: 12px; font-weight: 600; color: var(--gray-900); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ticket-meta { font-size: 11px; color: var(--gray-600); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+    /* Detail panel */
+    .detail-panel { display: none; }
+    .detail-panel.show { display: block; }
+    .back-btn { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--blue); cursor: pointer; margin-bottom: 12px; background: none; border: none; padding: 0; }
+    .detail-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .detail-id { font-size: 11px; color: var(--blue); font-weight: 700; margin-bottom: 10px; }
+    .detail-row { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px solid var(--gray-100); }
+    .detail-row span:first-child { color: var(--gray-600); }
+    .status-select { font-size: 12px; padding: 4px 6px; border: 1px solid var(--gray-300); border-radius: var(--radius); }
+
+    /* Badges */
+    .badge { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
     .badge-low { background: var(--green-light); color: var(--green); }
     .badge-medium { background: #fff4ce; color: #7a5c00; }
     .badge-high { background: var(--orange-light); color: var(--orange); }
     .badge-critical { background: #fde7e9; color: #a4262c; }
     .badge-open { background: var(--blue-light); color: var(--blue-dark); }
-    .badge-closed { background: var(--gray-200); color: var(--gray-600); }
+    .badge-inprogress { background: #fff4ce; color: #7a5c00; }
+    .badge-resolved { background: var(--green-light); color: var(--green); }
 
-    /* Submit button */
-    .btn-primary {
-      width: 100%;
-      padding: 9px;
-      background: var(--blue);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 6px;
-      transition: background 0.15s;
-    }
-    .btn-primary:hover { background: var(--blue-dark); }
-    .btn-primary:active { transform: scale(0.99); }
-
-    /* Success toast */
-    .toast {
-      display: none;
-      background: var(--green-light);
-      border: 1px solid #bad3b7;
-      border-left: 3px solid var(--green);
-      border-radius: var(--radius);
-      padding: 10px 12px;
-      font-size: 12px;
-      color: #0a4d0a;
-      margin-top: 10px;
-    }
-    .toast.show { display: flex; align-items: center; gap: 8px; }
-    .toast-icon { font-size: 15px; }
-
-    /* Ticket list */
-    .search-bar {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 10px;
-    }
-    .search-bar input { flex: 1; }
-    .ticket-list { display: flex; flex-direction: column; gap: 6px; }
-    .ticket-card {
-      border: 1px solid var(--gray-200);
-      border-radius: var(--radius);
-      padding: 10px 12px;
-      cursor: pointer;
-      transition: all 0.1s;
-      background: #fff;
-    }
-    .ticket-card:hover { border-color: var(--blue); background: var(--blue-light); }
-    .ticket-card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 4px;
-    }
-    .ticket-id { font-size: 11px; font-weight: 700; color: var(--blue); }
-    .ticket-title { font-size: 12px; font-weight: 600; color: var(--gray-900); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .ticket-meta { font-size: 11px; color: var(--gray-600); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-
-    /* Empty state */
-    .empty {
-      text-align: center;
-      padding: 30px 16px;
-      color: var(--gray-400);
-    }
+    .empty { text-align: center; padding: 30px 16px; color: var(--gray-400); }
     .empty-icon { font-size: 32px; margin-bottom: 8px; }
-    .empty p { font-size: 12px; }
-
-    /* Section divider */
-    .section-label {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--gray-400);
-      margin: 14px 0 6px;
-    }
+    .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-400); margin: 14px 0 8px; }
     .section-label:first-of-type { margin-top: 0; }
-
-    /* Assignee row */
-    .assignees {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 4px;
-    }
-    .avatar {
-      width: 26px; height: 26px;
-      border-radius: 50%;
-      background: var(--blue);
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      border: 2px solid transparent;
-      transition: border-color 0.1s;
-    }
-    .avatar.selected { border-color: var(--blue-dark); box-shadow: 0 0 0 1px var(--blue); }
-    .avatar:nth-child(2) { background: #7719aa; }
-    .avatar:nth-child(3) { background: var(--green); }
-    .avatar:nth-child(4) { background: #d83b01; }
+    .loading { text-align: center; padding: 20px; color: var(--gray-400); font-size: 12px; }
   </style>
 </head>
 <body>
@@ -277,29 +132,30 @@
   <div class="header-icon">🎫</div>
   <div>
     <h1>Ticket Manager</h1>
-    <p>Support & Helpdesk</p>
+    <p id="apiStatus">Connecting...</p>
   </div>
 </div>
 
 <div class="email-bar">
   <div class="email-subject" id="emailSubject">Loading email...</div>
-  <div class="email-from" id="emailFrom"></div>
+  <div class="email-meta" id="emailMeta"></div>
 </div>
 
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('create')">+ Create Ticket</div>
+  <div class="tab active" onclick="switchTab('create')">+ New Ticket</div>
   <div class="tab" onclick="switchTab('tickets')">All Tickets</div>
 </div>
 
-<!-- CREATE TICKET PANEL -->
+<!-- ── CREATE PANEL ─────────────────────────────────────────── -->
 <div class="panel active" id="panel-create">
 
-  <div class="section-label">Ticket Number</div>
-  <div class="field">
-    <div class="ticket-number-row">
-      <input type="text" id="ticketNumber" placeholder="e.g. TKT-0042" readonly style="background:var(--gray-50)"/>
-      <button class="btn-gen" onclick="generateTicketNumber()">Auto-generate</button>
-    </div>
+  <div class="config-notice" id="configNotice" style="display:none">
+    ⚙️ Open <strong>taskpane.html</strong> and set <code>--api-url</code> to your server IP.
+  </div>
+
+  <div class="sender-box" id="senderBox" style="display:none">
+    <strong id="senderName"></strong>
+    <span id="senderEmail"></span>
   </div>
 
   <div class="field">
@@ -331,175 +187,300 @@
 
   <div class="field">
     <label>Assign To</label>
-    <div class="assignees">
-      <div class="avatar" title="Alice" onclick="toggleAssignee(this)">AL</div>
-      <div class="avatar" title="Bob" onclick="toggleAssignee(this)">BO</div>
-      <div class="avatar" title="Carol" onclick="toggleAssignee(this)">CA</div>
-      <div class="avatar" title="Dan" onclick="toggleAssignee(this)">DA</div>
+    <div class="assignees" id="assigneeList">
+      <div class="avatar" title="Agent 1" onclick="toggleAssignee(this)">A1<span class="avatar-name">Agent 1</span></div>
+      <div class="avatar" title="Agent 2" onclick="toggleAssignee(this)">A2<span class="avatar-name">Agent 2</span></div>
+      <div class="avatar" title="Agent 3" onclick="toggleAssignee(this)">A3<span class="avatar-name">Agent 3</span></div>
+      <div class="avatar" title="Agent 4" onclick="toggleAssignee(this)">A4<span class="avatar-name">Agent 4</span></div>
     </div>
   </div>
 
-  <div class="field">
+  <div class="field" style="margin-top:24px">
     <label>Notes</label>
     <textarea id="ticketNotes" placeholder="Additional context or internal notes..."></textarea>
   </div>
 
-  <button class="btn-primary" onclick="createTicket()">Create Ticket</button>
+  <button class="btn-primary" id="createBtn" onclick="createTicket()">Create Ticket</button>
 
-  <div class="toast" id="successToast">
-    <span class="toast-icon">✅</span>
-    <span id="toastMsg">Ticket created successfully!</span>
-  </div>
+  <div class="toast" id="toast"></div>
 </div>
 
-<!-- ALL TICKETS PANEL -->
+<!-- ── TICKETS PANEL ────────────────────────────────────────── -->
 <div class="panel" id="panel-tickets">
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Search tickets..." oninput="filterTickets()"/>
-  </div>
-  <div class="ticket-list" id="ticketList">
-    <div class="empty">
-      <div class="empty-icon">🗂️</div>
-      <p>No tickets yet.<br>Create one from the current email.</p>
+
+  <!-- List view -->
+  <div id="listView">
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="Search tickets..." oninput="loadTickets()"/>
     </div>
+    <div class="filter-row">
+      <select id="filterStatus" onchange="loadTickets()">
+        <option value="">All statuses</option>
+        <option value="open">Open</option>
+        <option value="inprogress">In Progress</option>
+        <option value="resolved">Resolved</option>
+      </select>
+      <select id="filterPriority" onchange="loadTickets()">
+        <option value="">All priorities</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+    </div>
+    <div class="ticket-list" id="ticketList">
+      <div class="loading">Loading tickets...</div>
+    </div>
+  </div>
+
+  <!-- Detail view -->
+  <div class="detail-panel" id="detailView">
+    <button class="back-btn" onclick="showList()">← Back to tickets</button>
+    <div class="detail-id" id="detailId"></div>
+    <div class="detail-title" id="detailTitle"></div>
+    <div style="margin: 10px 0">
+      <label style="font-size:11px;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.3px;display:block;margin-bottom:4px">Status</label>
+      <select class="status-select" id="detailStatus" onchange="updateStatus()">
+        <option value="open">Open</option>
+        <option value="inprogress">In Progress</option>
+        <option value="resolved">Resolved</option>
+      </select>
+    </div>
+    <div id="detailRows"></div>
+    <div class="toast" id="detailToast" style="margin-top:10px"></div>
   </div>
 </div>
 
 <script>
-  let tickets = JSON.parse(localStorage.getItem('outlook_tickets') || '[]');
-  let ticketCounter = parseInt(localStorage.getItem('outlook_ticket_counter') || '41');
+  // ── CONFIG — change this to your API server IP/hostname ─────
+  const API_URL = "http://YOUR_SERVER_IP:4000";
+
+  // Email data captured from Office.js
+  let emailData = { subject: "", senderName: "", senderEmail: "" };
+  let currentTicketId = null;
 
   // ── Office.js init ──────────────────────────────────────────
   Office.onReady(function(info) {
+    checkApi();
     if (info.host === Office.HostType.Outlook) {
       loadEmailInfo();
     } else {
-      // Dev/preview mode — use mock data
-      document.getElementById('emailSubject').textContent = 'Re: Invoice not received for order #4821';
-      document.getElementById('emailFrom').textContent = 'From: john.smith@clientco.com';
-      document.getElementById('ticketTitle').value = 'Invoice not received for order #4821';
+      // Dev/preview mode
+      emailData = { subject: "Invoice not received for order #4821", senderName: "John Smith", senderEmail: "john@clientco.com" };
+      applyEmailData();
     }
-    renderTicketList();
-    generateTicketNumber();
   });
 
   function loadEmailInfo() {
     const item = Office.context.mailbox.item;
-    const subject = item.subject || '(No subject)';
-    document.getElementById('emailSubject').textContent = subject;
-    document.getElementById('ticketTitle').value = subject;
+    emailData.subject = item.subject || "(No subject)";
+    document.getElementById("emailSubject").textContent = emailData.subject;
+    document.getElementById("ticketTitle").value = emailData.subject;
 
     item.from.getAsync(function(result) {
       if (result.status === Office.AsyncResultStatus.Succeeded) {
-        const sender = result.value;
-        document.getElementById('emailFrom').textContent =
-          'From: ' + (sender.displayName || sender.emailAddress);
+        emailData.senderName  = result.value.displayName  || "";
+        emailData.senderEmail = result.value.emailAddress || "";
+        applyEmailData();
       }
     });
   }
 
-  // ── Tab switching ───────────────────────────────────────────
-  function switchTab(name) {
-    document.querySelectorAll('.tab').forEach((t, i) => {
-      t.classList.toggle('active', (i === 0 && name === 'create') || (i === 1 && name === 'tickets'));
-    });
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + name).classList.add('active');
-    if (name === 'tickets') renderTicketList();
+  function applyEmailData() {
+    document.getElementById("emailSubject").textContent = emailData.subject;
+    document.getElementById("ticketTitle").value = emailData.subject;
+
+    if (emailData.senderName || emailData.senderEmail) {
+      document.getElementById("senderName").textContent  = emailData.senderName;
+      document.getElementById("senderEmail").textContent = emailData.senderEmail;
+      document.getElementById("emailMeta").textContent   = "From: " + (emailData.senderName || emailData.senderEmail);
+      document.getElementById("senderBox").style.display = "block";
+    }
   }
 
-  // ── Ticket number ───────────────────────────────────────────
-  function generateTicketNumber() {
-    ticketCounter++;
-    localStorage.setItem('outlook_ticket_counter', ticketCounter);
-    document.getElementById('ticketNumber').value = 'TKT-' + String(ticketCounter).padStart(4, '0');
+  // ── API health check ────────────────────────────────────────
+  async function checkApi() {
+    const statusEl = document.getElementById("apiStatus");
+    const notice   = document.getElementById("configNotice");
+
+    if (API_URL.includes("YOUR_SERVER_IP")) {
+      statusEl.textContent = "⚠️ API not configured";
+      notice.style.display = "block";
+      return;
+    }
+    try {
+      const r = await fetch(`${API_URL}/health`);
+      if (r.ok) {
+        statusEl.textContent = "● Connected";
+      } else {
+        statusEl.textContent = "⚠️ API error";
+      }
+    } catch {
+      statusEl.textContent = "⚠️ API unreachable";
+    }
+  }
+
+  // ── Tab switching ───────────────────────────────────────────
+  function switchTab(name) {
+    document.querySelectorAll(".tab").forEach((t, i) =>
+      t.classList.toggle("active", (i === 0 && name === "create") || (i === 1 && name === "tickets"))
+    );
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    document.getElementById("panel-" + name).classList.add("active");
+    if (name === "tickets") { showList(); loadTickets(); }
   }
 
   // ── Assignee toggle ─────────────────────────────────────────
-  function toggleAssignee(el) {
-    el.classList.toggle('selected');
-  }
+  function toggleAssignee(el) { el.classList.toggle("selected"); }
 
   // ── Create ticket ───────────────────────────────────────────
-  function createTicket() {
-    const number = document.getElementById('ticketNumber').value.trim();
-    const title = document.getElementById('ticketTitle').value.trim();
-    if (!number || !title) {
-      alert('Please fill in the Ticket Number and Title.');
-      return;
+  async function createTicket() {
+    const title = document.getElementById("ticketTitle").value.trim();
+    if (!title) { showToast("toast", "Please enter a title.", "error"); return; }
+
+    const assigned = Array.from(document.querySelectorAll(".avatar.selected")).map(a => a.title).join(", ");
+    const btn = document.getElementById("createBtn");
+    btn.disabled = true;
+    btn.textContent = "Creating...";
+
+    try {
+      const res = await fetch(`${API_URL}/tickets`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          senderName:   emailData.senderName,
+          senderEmail:  emailData.senderEmail,
+          emailSubject: emailData.subject,
+          priority:     document.getElementById("ticketPriority").value,
+          category:     document.getElementById("ticketCategory").value,
+          assignedTo:   assigned || null,
+          notes:        document.getElementById("ticketNotes").value.trim() || null,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+
+      showToast("toast", `✅ ${data.ticketNumber} created!`, "success");
+      document.getElementById("ticketNotes").value = "";
+      document.querySelectorAll(".avatar.selected").forEach(a => a.classList.remove("selected"));
+    } catch (err) {
+      showToast("toast", "❌ " + err.message, "error");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Create Ticket";
     }
-
-    const assigned = Array.from(document.querySelectorAll('.avatar.selected')).map(a => a.title);
-
-    const ticket = {
-      id: number,
-      title: title,
-      priority: document.getElementById('ticketPriority').value,
-      category: document.getElementById('ticketCategory').value,
-      assignees: assigned,
-      notes: document.getElementById('ticketNotes').value.trim(),
-      status: 'open',
-      from: document.getElementById('emailFrom').textContent.replace('From: ', ''),
-      subject: document.getElementById('emailSubject').textContent,
-      created: new Date().toISOString()
-    };
-
-    tickets.unshift(ticket);
-    localStorage.setItem('outlook_tickets', JSON.stringify(tickets));
-
-    const toast = document.getElementById('successToast');
-    document.getElementById('toastMsg').textContent = number + ' created successfully!';
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3500);
-
-    // Reset for next email
-    document.querySelectorAll('.avatar.selected').forEach(a => a.classList.remove('selected'));
-    document.getElementById('ticketNotes').value = '';
-    generateTicketNumber();
   }
 
-  // ── Ticket list ─────────────────────────────────────────────
-  function priorityBadge(p) {
-    const map = { low: 'badge-low', medium: '', high: 'badge-high', critical: 'badge-critical' };
-    const labels = { low: 'Low', medium: 'Medium', high: 'High', critical: 'Critical' };
-    return `<span class="badge ${map[p]}" style="${p==='medium'?'background:#fff4ce;color:#7a5c00':''}">${labels[p]}</span>`;
-  }
+  // ── Load tickets ────────────────────────────────────────────
+  async function loadTickets() {
+    const list     = document.getElementById("ticketList");
+    const search   = document.getElementById("searchInput").value.trim();
+    const status   = document.getElementById("filterStatus").value;
+    const priority = document.getElementById("filterPriority").value;
 
-  function renderTicketList(filter = '') {
-    const list = document.getElementById('ticketList');
-    const filtered = tickets.filter(t =>
-      t.id.toLowerCase().includes(filter.toLowerCase()) ||
-      t.title.toLowerCase().includes(filter.toLowerCase()) ||
-      (t.from || '').toLowerCase().includes(filter.toLowerCase())
-    );
+    list.innerHTML = `<div class="loading">Loading...</div>`;
 
-    if (!filtered.length) {
-      list.innerHTML = `<div class="empty"><div class="empty-icon">🗂️</div><p>${filter ? 'No matching tickets.' : 'No tickets yet.<br>Create one from the current email.'}</p></div>`;
-      return;
-    }
+    try {
+      const params = new URLSearchParams();
+      if (search)   params.set("search",   search);
+      if (status)   params.set("status",   status);
+      if (priority) params.set("priority", priority);
 
-    list.innerHTML = filtered.map(t => {
-      const date = new Date(t.created).toLocaleDateString('en-CA');
-      const assignStr = t.assignees && t.assignees.length ? t.assignees.join(', ') : 'Unassigned';
-      return `
-        <div class="ticket-card">
+      const res = await fetch(`${API_URL}/tickets?${params}`);
+      if (!res.ok) throw new Error("API error");
+      const tickets = await res.json();
+
+      if (!tickets.length) {
+        list.innerHTML = `<div class="empty"><div class="empty-icon">🗂️</div><p>No tickets found.</p></div>`;
+        return;
+      }
+
+      list.innerHTML = tickets.map(t => `
+        <div class="ticket-card" onclick="showDetail(${t.Id})">
           <div class="ticket-card-top">
-            <span class="ticket-id">${t.id}</span>
-            ${priorityBadge(t.priority)}
+            <span class="ticket-id">${t.TicketNumber}</span>
+            ${priorityBadge(t.Priority)}
           </div>
-          <div class="ticket-title">${t.title}</div>
+          <div class="ticket-title">${t.Title}</div>
           <div class="ticket-meta">
-            <span class="badge badge-open">${t.status}</span>
-            <span>${t.category}</span>
-            <span>· ${assignStr}</span>
-            <span>· ${date}</span>
+            ${statusBadge(t.Status)}
+            <span>${t.Category}</span>
+            ${t.AssignedTo ? `<span>· ${t.AssignedTo}</span>` : ""}
+            <span>· ${t.CreatedAt}</span>
           </div>
-        </div>`;
-    }).join('');
+          ${t.SenderEmail ? `<div style="font-size:11px;color:var(--gray-400);margin-top:3px">${t.SenderEmail}</div>` : ""}
+        </div>`).join("");
+    } catch (err) {
+      list.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><p>Could not load tickets.<br>${err.message}</p></div>`;
+    }
   }
 
-  function filterTickets() {
-    renderTicketList(document.getElementById('searchInput').value);
+  // ── Show ticket detail ──────────────────────────────────────
+  async function showDetail(id) {
+    currentTicketId = id;
+    document.getElementById("listView").style.display   = "none";
+    document.getElementById("detailView").classList.add("show");
+
+    try {
+      const res = await fetch(`${API_URL}/tickets/${id}`);
+      const t   = await res.json();
+
+      document.getElementById("detailId").textContent    = t.TicketNumber;
+      document.getElementById("detailTitle").textContent = t.Title;
+      document.getElementById("detailStatus").value      = t.Status;
+
+      document.getElementById("detailRows").innerHTML = `
+        <div class="detail-row"><span>From</span><span>${t.SenderName || "—"} ${t.SenderEmail ? `(${t.SenderEmail})` : ""}</span></div>
+        <div class="detail-row"><span>Priority</span><span>${priorityBadge(t.Priority)}</span></div>
+        <div class="detail-row"><span>Category</span><span>${t.Category}</span></div>
+        <div class="detail-row"><span>Assigned</span><span>${t.AssignedTo || "Unassigned"}</span></div>
+        <div class="detail-row"><span>Created</span><span>${t.CreatedAt}</span></div>
+        <div class="detail-row"><span>Updated</span><span>${t.UpdatedAt}</span></div>
+        ${t.Notes ? `<div style="margin-top:10px;font-size:12px;color:var(--gray-600)">${t.Notes}</div>` : ""}
+      `;
+    } catch (err) {
+      document.getElementById("detailRows").innerHTML = `<p style="color:red;font-size:12px">${err.message}</p>`;
+    }
+  }
+
+  async function updateStatus() {
+    if (!currentTicketId) return;
+    const status = document.getElementById("detailStatus").value;
+    try {
+      await fetch(`${API_URL}/tickets/${currentTicketId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      showToast("detailToast", "✅ Status updated", "success");
+    } catch (err) {
+      showToast("detailToast", "❌ " + err.message, "error");
+    }
+  }
+
+  function showList() {
+    currentTicketId = null;
+    document.getElementById("listView").style.display = "block";
+    document.getElementById("detailView").classList.remove("show");
+  }
+
+  // ── Helpers ─────────────────────────────────────────────────
+  function priorityBadge(p) {
+    const map = { low: "badge-low", medium: "badge-medium", high: "badge-high", critical: "badge-critical" };
+    return `<span class="badge ${map[p] || ''}">${p}</span>`;
+  }
+  function statusBadge(s) {
+    const map = { open: "badge-open", inprogress: "badge-inprogress", resolved: "badge-resolved" };
+    const labels = { open: "Open", inprogress: "In Progress", resolved: "Resolved" };
+    return `<span class="badge ${map[s] || ''}">${labels[s] || s}</span>`;
+  }
+  function showToast(id, msg, type) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = `toast ${type} show`;
+    setTimeout(() => el.classList.remove("show"), 4000);
   }
 </script>
 </body>
