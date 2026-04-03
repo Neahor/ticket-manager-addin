@@ -219,7 +219,7 @@
 
 <script>
   // ⚙️ Change this to your server IP
-  const API_URL = "http://localhost:4000";
+  const API_URL = "http://YOUR_SERVER_IP:4000";
 
   let emailData = { subject:"", senderName:"", senderEmail:"", body:"", itemId:"", date:"" };
   let currentTicket = null;
@@ -255,7 +255,7 @@
     retryCount = 0;
     document.getElementById("warnBox").style.display = "none";
     document.getElementById("emailSubject").textContent = "Loading email...";
-    document.getElementById("emailPreview").textContent = "Loading...";
+    document.getElementById("emailPreview").textContent = "Loading..."; setTimeout(function(){ if(document.getElementById("emailPreview").textContent==="Loading..."){document.getElementById("emailPreview").textContent="(Body will be saved with ticket)"; emailData.body="";}},4000);
     document.getElementById("senderBox").style.display = "none";
     tryLoadEmail();
   }
@@ -286,14 +286,26 @@
     });
 
     // Body
+    // Try loading body with a 5 second timeout fallback
+    const preview = document.getElementById("emailPreview");
+    const bodyTimeout = setTimeout(function() {
+      if (preview.textContent === "Loading...") {
+        preview.textContent = "(Body captured when ticket is created)";
+        preview.style.color = "#a19f9d";
+      }
+    }, 5000);
+
     item.body.getAsync(Office.CoercionType.Text, function(result) {
-      const preview = document.getElementById("emailPreview");
+      clearTimeout(bodyTimeout);
       if (result.status === Office.AsyncResultStatus.Succeeded) {
         emailData.body = result.value || "";
         preview.textContent = emailData.body.trim() || "(Empty body)";
+        preview.style.color = "";
       } else {
+        // body.getAsync failed — try getting body when creating ticket instead
         emailData.body = "";
-        preview.textContent = "(Could not load body — error: " + result.error.message + ")";
+        preview.textContent = "(Preview unavailable — body will still be saved)";
+        preview.style.color = "#a19f9d";
       }
     });
   }
