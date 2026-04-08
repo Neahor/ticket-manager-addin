@@ -1,113 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8"/>
-  <title>Ticket Manager - Debug</title>
+  <meta name="color-scheme" content="light"/>
+  <title>Debug 2</title>
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; font-size: 12px; padding: 16px; }
-    h2 { color: #0078d4; margin-bottom: 12px; }
-    .row { padding: 6px 0; border-bottom: 1px solid #edebe9; display: flex; gap: 8px; }
-    .lbl { color: #605e5c; min-width: 140px; font-weight: 600; }
-    .val { color: #201f1e; word-break: break-all; }
-    .ok  { color: #107c10; }
-    .err { color: #a4262c; }
-    .warn{ color: #d83b01; }
-    button { margin-top: 12px; padding: 8px 16px; background: #0078d4; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; }
-    #log { margin-top: 12px; background: #f3f2f1; padding: 10px; border-radius: 4px; font-size: 11px; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
+    html,body{background:#fff !important;color:#000 !important;font-family:'Segoe UI',sans-serif;font-size:12px;padding:12px;}
+    .row{padding:4px 0;border-bottom:1px solid #eee;}
+    .ok{color:green;} .err{color:red;} .warn{color:orange;}
+    button{margin:6px 4px 0 0;padding:6px 12px;background:#0078d4;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;}
+    #log{margin-top:10px;background:#f3f2f1;padding:8px;font-size:11px;white-space:pre-wrap;max-height:300px;overflow-y:auto;}
   </style>
 </head>
 <body>
-<h2>🔍 Debug Panel</h2>
-<div id="results"></div>
-<button onclick="runDiag()">Run Diagnostics</button>
+<div id="out"></div>
+<button onclick="testFrom()">Test From</button>
+<button onclick="testBodyText()">Test Body (Text)</button>
+<button onclick="testBodyHtml()">Test Body (HTML)</button>
+<button onclick="testBodyDelay()">Test Body (2s delay)</button>
 <div id="log"></div>
-
 <script>
-  var log = "";
-  function addLog(msg) {
-    log += new Date().toISOString().substr(11,8) + " " + msg + "\n";
-    document.getElementById("log").textContent = log;
-  }
+  var logs = [];
+  function log(msg){ logs.push(new Date().toISOString().substr(11,8)+" "+msg); document.getElementById("log").textContent=logs.join("\n"); }
+  function add(label,val,cls){ document.getElementById("out").innerHTML += '<div class="row"><b>'+label+':</b> <span class="'+(cls||"")+'">'+val+'</span></div>'; }
 
-  function row(label, value, status) {
-    var cls = status === "ok" ? "ok" : status === "err" ? "err" : "warn";
-    return '<div class="row"><span class="lbl">'+label+'</span><span class="val '+cls+'">'+value+'</span></div>';
-  }
-
-  Office.onReady(function(info) {
-    addLog("Office.onReady fired");
-    addLog("host: " + (info.host || "null"));
-    addLog("platform: " + (info.platform || "null"));
-    addLog("isOutlook: " + (info.host === Office.HostType.Outlook));
-
-    var html = "";
-    html += row("Office.onReady", "✅ Fired", "ok");
-    html += row("Host", info.host || "null", info.host ? "ok" : "err");
-    html += row("Platform", info.platform || "null", info.platform ? "ok" : "warn");
-    html += row("Is Outlook", info.host === Office.HostType.Outlook ? "YES ✅" : "NO ❌", info.host === Office.HostType.Outlook ? "ok" : "err");
-
-    var mailbox = Office.context && Office.context.mailbox;
-    html += row("Office.context.mailbox", mailbox ? "✅ Available" : "❌ NULL", mailbox ? "ok" : "err");
-
-    if (mailbox) {
-      var item = mailbox.item;
-      addLog("mailbox.item: " + (item ? "available" : "null"));
-      html += row("mailbox.item", item ? "✅ Available" : "❌ NULL", item ? "ok" : "err");
-
-      if (item) {
-        html += row("item.subject", item.subject || "(empty)", item.subject ? "ok" : "warn");
-        html += row("item.itemId", item.itemId ? item.itemId.substr(0,30)+"..." : "❌ NULL", item.itemId ? "ok" : "err");
-        html += row("item.itemType", item.itemType || "null", item.itemType ? "ok" : "warn");
-        html += row("item.dateTimeCreated", item.dateTimeCreated || "null", item.dateTimeCreated ? "ok" : "warn");
-
-        addLog("subject: " + item.subject);
-        addLog("itemId: " + (item.itemId ? item.itemId.substr(0,30) : "null"));
-        addLog("itemType: " + item.itemType);
-
-        // Try from
-        item.from.getAsync(function(result) {
-          addLog("from.getAsync status: " + result.status);
-          if (result.status === Office.AsyncResultStatus.Succeeded) {
-            addLog("from: " + result.value.emailAddress);
-            document.getElementById("results").innerHTML +=
-              row("item.from", result.value.displayName + " <" + result.value.emailAddress + ">", "ok");
-          } else {
-            addLog("from error: " + JSON.stringify(result.error));
-            document.getElementById("results").innerHTML +=
-              row("item.from", "❌ Error: " + result.error.message, "err");
-          }
-        });
-
-        // Try body
-        item.body.getAsync(Office.CoercionType.Text, function(result) {
-          addLog("body.getAsync status: " + result.status);
-          if (result.status === Office.AsyncResultStatus.Succeeded) {
-            addLog("body length: " + result.value.length);
-            document.getElementById("results").innerHTML +=
-              row("item.body", "✅ Length: " + result.value.length + " chars", "ok");
-          } else {
-            addLog("body error: " + JSON.stringify(result.error));
-            document.getElementById("results").innerHTML +=
-              row("item.body", "❌ Error: " + result.error.message, "err");
-          }
-        });
-      }
-    }
-
-    html += row("Office.js version", Office.context.diagnostics ? JSON.stringify(Office.context.diagnostics) : "n/a", "warn");
-    document.getElementById("results").innerHTML = html;
+  Office.onReady(function(info){
+    log("onReady: host="+info.host+" platform="+info.platform);
+    var item = Office.context.mailbox.item;
+    if(!item){ log("ERROR: item is null"); return; }
+    log("item ok, subject="+item.subject);
+    add("Subject", item.subject, "ok");
+    add("ItemId", item.itemId ? item.itemId.substr(0,20)+"..." : "null", item.itemId?"ok":"err");
+    add("ItemType", item.itemType, "ok");
   });
 
-  function runDiag() {
-    addLog("--- Manual diagnostic run ---");
-    var item = Office.context && Office.context.mailbox && Office.context.mailbox.item;
-    addLog("item on manual check: " + (item ? "available" : "null"));
-    if (item) {
-      addLog("subject: " + item.subject);
-      addLog("itemId: " + (item.itemId || "null"));
-    }
-    document.getElementById("results").innerHTML += row("Manual check", item ? "✅ item available: "+item.subject : "❌ still null", item ? "ok" : "err");
+  function testFrom(){
+    log("--- testFrom ---");
+    var item = Office.context.mailbox.item;
+    item.from.getAsync(function(r){
+      log("from callback fired, status="+r.status);
+      if(r.status===Office.AsyncResultStatus.Succeeded){
+        log("from="+r.value.emailAddress);
+        add("From", r.value.displayName+" <"+r.value.emailAddress+">", "ok");
+      } else {
+        log("from error="+JSON.stringify(r.error));
+        add("From Error", JSON.stringify(r.error), "err");
+      }
+    });
+    log("from.getAsync called, waiting for callback...");
+  }
+
+  function testBodyText(){
+    log("--- testBodyText ---");
+    var item = Office.context.mailbox.item;
+    item.body.getAsync(Office.CoercionType.Text, function(r){
+      log("body(Text) callback fired, status="+r.status);
+      if(r.status===Office.AsyncResultStatus.Succeeded){
+        log("body length="+r.value.length);
+        add("Body (Text)", "Length: "+r.value.length+" — "+r.value.substr(0,80), "ok");
+      } else {
+        log("body error="+JSON.stringify(r.error));
+        add("Body (Text) Error", JSON.stringify(r.error), "err");
+      }
+    });
+    log("body.getAsync(Text) called, waiting...");
+  }
+
+  function testBodyHtml(){
+    log("--- testBodyHtml ---");
+    var item = Office.context.mailbox.item;
+    item.body.getAsync(Office.CoercionType.Html, function(r){
+      log("body(Html) callback fired, status="+r.status);
+      if(r.status===Office.AsyncResultStatus.Succeeded){
+        log("body html length="+r.value.length);
+        add("Body (HTML)", "Length: "+r.value.length, "ok");
+      } else {
+        log("body html error="+JSON.stringify(r.error));
+        add("Body (HTML) Error", JSON.stringify(r.error), "err");
+      }
+    });
+    log("body.getAsync(Html) called, waiting...");
+  }
+
+  function testBodyDelay(){
+    log("--- testBodyDelay (2s) ---");
+    setTimeout(function(){
+      log("2s passed, calling getAsync now...");
+      var item = Office.context.mailbox.item;
+      item.body.getAsync(Office.CoercionType.Text, function(r){
+        log("delayed body callback fired, status="+r.status);
+        if(r.status===Office.AsyncResultStatus.Succeeded){
+          log("body ok, length="+r.value.length);
+          add("Body (Delayed)", "✅ Length: "+r.value.length, "ok");
+        } else {
+          log("body error="+JSON.stringify(r.error));
+          add("Body (Delayed) Error", JSON.stringify(r.error), "err");
+        }
+      });
+    }, 2000);
+    log("waiting 2 seconds...");
   }
 </script>
 </body>
