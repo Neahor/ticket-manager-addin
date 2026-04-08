@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
+  <meta name="color-scheme" content="light"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Ticket Manager</title>
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
   <style>
+    html, body { background: #ffffff !important; color: #201f1e !important; color-scheme: light !important; }
     :root {
       --blue:#0078d4;--blue-light:#deecf9;--blue-dark:#005a9e;
       --green:#107c10;--green-light:#dff6dd;
@@ -15,14 +17,17 @@
       --radius:4px;--font:'Segoe UI',system-ui,sans-serif;
     }
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:var(--font);font-size:13px;color:var(--gray-900);background:#fff;}
+    body{font-family:var(--font);font-size:13px;color:#201f1e !important;background:#ffffff !important;}
     .header{background:var(--blue);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;}
     .header-icon{width:28px;height:28px;background:rgba(255,255,255,0.2);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:15px;}
     .header h1{font-size:14px;font-weight:600;}
     .header p{font-size:11px;opacity:0.85;}
-    .email-bar{background:var(--gray-50);border-bottom:1px solid var(--gray-200);padding:10px 16px;}
+    .email-bar{background:var(--gray-50);border-bottom:1px solid var(--gray-200);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;}
+    .email-bar-info{flex:1;min-width:0;}
     .email-subject{font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
     .email-meta{font-size:11px;color:var(--gray-600);}
+    .reload-btn{background:none;border:1px solid var(--gray-300);border-radius:var(--radius);padding:4px 8px;font-size:11px;cursor:pointer;color:var(--gray-600);white-space:nowrap;margin-left:8px;}
+    .reload-btn:hover{background:var(--gray-100);}
     .tabs{display:flex;border-bottom:1px solid var(--gray-200);}
     .tab{flex:1;padding:9px 0;font-size:12px;font-weight:500;text-align:center;cursor:pointer;color:var(--gray-600);border-bottom:2px solid transparent;transition:all 0.15s;}
     .tab.active{color:var(--blue);border-bottom-color:var(--blue);}
@@ -37,14 +42,12 @@
     .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
     .sender-box{background:var(--blue-light);border:1px solid #b3d6f0;border-radius:var(--radius);padding:8px 10px;margin-bottom:12px;font-size:11px;}
     .sender-box strong{color:var(--blue-dark);display:block;margin-bottom:2px;}
-    .sender-box span{color:var(--gray-600);}
-    .email-preview{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:8px 10px;font-size:11px;color:var(--gray-600);max-height:80px;overflow:hidden;line-height:1.5;position:relative;margin-bottom:12px;}
+    .email-preview{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:8px 10px;font-size:11px;color:var(--gray-600);max-height:80px;overflow:hidden;line-height:1.5;}
     .assignees{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;padding-bottom:16px;}
     .avatar{width:30px;height:30px;border-radius:50%;background:var(--blue);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid transparent;transition:all 0.1s;position:relative;}
     .avatar:nth-child(2){background:var(--purple);}
     .avatar:nth-child(3){background:var(--green);}
     .avatar:nth-child(4){background:var(--orange);}
-    .avatar:nth-child(5){background:#008575;}
     .avatar.selected{border-color:var(--gray-900);box-shadow:0 0 0 1px var(--gray-900);}
     .avatar-name{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--gray-600);white-space:nowrap;}
     .btn-primary{width:100%;padding:9px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;transition:background 0.15s;}
@@ -89,6 +92,7 @@
     .empty{text-align:center;padding:30px 16px;color:var(--gray-400);}
     .empty-icon{font-size:32px;margin-bottom:8px;}
     .loading{text-align:center;padding:20px;color:var(--gray-400);font-size:12px;}
+    .warn-box{background:#fff4ce;border:1px solid #f0d060;border-left:3px solid #d4a800;border-radius:var(--radius);padding:8px 10px;font-size:11px;color:#5c4400;margin-bottom:12px;}
   </style>
 </head>
 <body>
@@ -99,8 +103,11 @@
 </div>
 
 <div class="email-bar">
-  <div class="email-subject" id="emailSubject">Loading email...</div>
-  <div class="email-meta" id="emailMeta"></div>
+  <div class="email-bar-info">
+    <div class="email-subject" id="emailSubject">Loading email...</div>
+    <div class="email-meta" id="emailMeta"></div>
+  </div>
+  <button class="reload-btn" onclick="retryLoad()">↺ Reload</button>
 </div>
 
 <div class="tabs">
@@ -110,6 +117,9 @@
 
 <!-- CREATE PANEL -->
 <div class="panel active" id="panel-create">
+  <div class="warn-box" id="warnBox" style="display:none">
+    ⚠️ Could not read email. Click <strong>↺ Reload</strong> above, or close and reopen the panel.
+  </div>
   <div class="sender-box" id="senderBox" style="display:none">
     <strong id="senderNameDisplay"></strong>
     <span id="senderEmailDisplay"></span>
@@ -141,7 +151,7 @@
   </div>
   <div class="field">
     <label>Email Preview</label>
-    <div class="email-preview" id="emailPreview">Loading email body...</div>
+    <div class="email-preview" id="emailPreview">Loading...</div>
   </div>
   <div class="field">
     <label>Assign To</label>
@@ -181,11 +191,8 @@
         <option value="low">Low</option>
       </select>
     </div>
-    <div class="ticket-list" id="ticketList">
-      <div class="loading">Loading tickets...</div>
-    </div>
+    <div class="ticket-list" id="ticketList"><div class="loading">Loading tickets...</div></div>
   </div>
-
   <div class="detail-panel" id="detailView">
     <button class="back-btn" onclick="showList()">← Back to tickets</button>
     <div class="detail-id" id="detailId"></div>
@@ -216,61 +223,97 @@
 
   let emailData = { subject:"", senderName:"", senderEmail:"", body:"", itemId:"", date:"" };
   let currentTicket = null;
+  let retryCount = 0;
+  const MAX_RETRIES = 10;
 
   Office.onReady(function(info) {
     checkApi();
     if (info.host === Office.HostType.Outlook) {
-      loadEmailInfo();
-    } else {
-      emailData = { subject:"Invoice not received #4821", senderName:"John Smith", senderEmail:"john@clientco.com", body:"Hi, I still haven't received the invoice for order #4821.", itemId:"FAKE-ID-123", date:new Date().toISOString() };
-      applyEmailData();
+      tryLoadEmail();
     }
   });
 
-  function loadEmailInfo() {
-    const item = Office.context.mailbox.item;
-
-    // Capture subject
-    emailData.subject = item.subject || "(No subject)";
-
-    // Capture item ID for reopening the email later
-    emailData.itemId = item.itemId || "";
-
-    // Capture date
-    emailData.date = item.dateTimeCreated ? item.dateTimeCreated.toISOString() : new Date().toISOString();
-
-    document.getElementById("emailSubject").textContent = emailData.subject;
-    document.getElementById("ticketTitle").value = emailData.subject;
-
-    // Capture sender
-    item.from.getAsync(function(result) {
-      if (result.status === Office.AsyncResultStatus.Succeeded) {
-        emailData.senderName  = result.value.displayName  || "";
-        emailData.senderEmail = result.value.emailAddress || "";
-        applyEmailData();
-      }
-    });
-
-    // Capture full email body as plain text
-    item.body.getAsync(Office.CoercionType.Text, function(result) {
-      if (result.status === Office.AsyncResultStatus.Succeeded) {
-        emailData.body = result.value || "";
-        const preview = document.getElementById("emailPreview");
-        preview.textContent = emailData.body.trim() || "(No body)";
-      }
-    });
+  // Keep retrying until item is available
+  function tryLoadEmail() {
+    const item = Office.context.mailbox && Office.context.mailbox.item;
+    if (item) {
+      retryCount = 0;
+      loadEmailInfo(item);
+    } else if (retryCount < MAX_RETRIES) {
+      retryCount++;
+      document.getElementById("emailSubject").textContent = "Loading email... (" + retryCount + ")";
+      setTimeout(tryLoadEmail, 500);
+    } else {
+      // Give up — show warning and let user retry manually
+      document.getElementById("emailSubject").textContent = "Could not load email";
+      document.getElementById("emailPreview").textContent = "Click ↺ Reload to try again.";
+      document.getElementById("warnBox").style.display = "block";
+    }
   }
 
-  function applyEmailData() {
+  function retryLoad() {
+    retryCount = 0;
+    document.getElementById("warnBox").style.display = "none";
+    document.getElementById("emailSubject").textContent = "Loading email...";
+    document.getElementById("emailPreview").textContent = "Loading..."; setTimeout(function(){ if(document.getElementById("emailPreview").textContent==="Loading..."){document.getElementById("emailPreview").textContent="(Body will be saved with ticket)"; emailData.body="";}},4000);
+    document.getElementById("senderBox").style.display = "none";
+    tryLoadEmail();
+  }
+
+  function loadEmailInfo(item) {
+    // Subject & metadata — all synchronous
+    emailData.subject = item.subject || "(No subject)";
+    emailData.date    = item.dateTimeCreated ? item.dateTimeCreated.toISOString() : new Date().toISOString();
+    emailData.itemId  = item.itemId || item.conversationId || "";
+
     document.getElementById("emailSubject").textContent = emailData.subject;
-    document.getElementById("ticketTitle").value = emailData.subject;
-    if (emailData.senderName || emailData.senderEmail) {
-      document.getElementById("senderNameDisplay").textContent  = emailData.senderName;
-      document.getElementById("senderEmailDisplay").textContent = emailData.senderEmail;
-      document.getElementById("emailMeta").textContent = "From: " + (emailData.senderName ? emailData.senderName + " <" + emailData.senderEmail + ">" : emailData.senderEmail);
-      document.getElementById("senderBox").style.display = "block";
+    document.getElementById("ticketTitle").value        = emailData.subject;
+
+    // Read sender synchronously (available without getAsync in read mode)
+    try {
+      var from = item.from;
+      if (from && from.emailAddress) {
+        emailData.senderName  = from.displayName  || "";
+        emailData.senderEmail = from.emailAddress || "";
+        document.getElementById("senderNameDisplay").textContent  = emailData.senderName;
+        document.getElementById("senderEmailDisplay").textContent = emailData.senderEmail;
+        document.getElementById("emailMeta").textContent = "From: " + (emailData.senderName ? emailData.senderName + " <" + emailData.senderEmail + ">" : emailData.senderEmail);
+        document.getElementById("senderBox").style.display = "block";
+      }
+    } catch(e) {
+      document.getElementById("emailMeta").textContent = "";
     }
-    if (emailData.body) document.getElementById("emailPreview").textContent = emailData.body.trim();
+
+    // Body
+    // Load body — try HTML first, fall back to Text
+    const preview = document.getElementById("emailPreview");
+
+    function stripHtml(html) {
+      return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
+    function tryTextBody() {
+      item.body.getAsync(Office.CoercionType.Text, function(r2) {
+        if (r2.status === Office.AsyncResultStatus.Succeeded && r2.value) {
+          emailData.body = r2.value.trim();
+          preview.textContent = emailData.body || "(Empty body)";
+        } else {
+          emailData.body = "";
+          preview.textContent = "(Body unavailable)";
+          preview.style.color = "#a19f9d";
+        }
+      });
+    }
+
+    item.body.getAsync(Office.CoercionType.Html, function(result) {
+      if (result.status === Office.AsyncResultStatus.Succeeded && result.value) {
+        emailData.body = stripHtml(result.value);
+        preview.textContent = emailData.body || "(Empty body)";
+      } else {
+        // HTML failed, try plain text
+        tryTextBody();
+      }
+    });
   }
 
   async function checkApi() {
@@ -300,10 +343,10 @@
     const btn = document.getElementById("createBtn");
     btn.disabled=true; btn.textContent="Creating...";
     try {
-      const res = await fetch(API_URL+"/tickets", {
+      const res = await fetch(API_URL+"/tickets",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({
+        body:JSON.stringify({
           title,
           senderName:   emailData.senderName,
           senderEmail:  emailData.senderEmail,
@@ -375,7 +418,7 @@
         ${t.Notes?`<div style="margin-top:8px;padding:8px;background:var(--gray-50);border-radius:var(--radius);font-size:12px;color:var(--gray-600)">${t.Notes}</div>`:""}
       `;
       const bodySection=document.getElementById("emailBodySection");
-      if (t.EmailBody) {
+      if(t.EmailBody){
         document.getElementById("detailEmailBody").textContent=t.EmailBody.trim();
         bodySection.style.display="block";
         document.getElementById("openEmailBtn").style.display=t.EmailId?"flex":"none";
@@ -388,14 +431,14 @@
   }
 
   function openOriginalEmail() {
-    if (!currentTicket||!currentTicket.EmailId) return;
+    if(!currentTicket||!currentTicket.EmailId) return;
     Office.context.mailbox.displayMessageForm(currentTicket.EmailId);
   }
 
   async function updateStatus() {
-    if (!currentTicket) return;
+    if(!currentTicket) return;
     try {
-      await fetch(API_URL+"/tickets/"+currentTicket.Id, {
+      await fetch(API_URL+"/tickets/"+currentTicket.Id,{
         method:"PATCH",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({status:document.getElementById("detailStatus").value}),
