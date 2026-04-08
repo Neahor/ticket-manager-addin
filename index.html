@@ -288,30 +288,47 @@
     // Load body — try HTML first, fall back to Text
     const preview = document.getElementById("emailPreview");
 
-    function stripHtml(html) {
-      return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-    }
+    function cleanHtml(html) {
+      // Use a temporary DOM element to properly decode HTML
+      var tmp = document.createElement("div");
+      tmp.innerHTML = html;
 
-    function tryTextBody() {
-      item.body.getAsync(Office.CoercionType.Text, function(r2) {
-        if (r2.status === Office.AsyncResultStatus.Succeeded && r2.value) {
-          emailData.body = r2.value.trim();
-          preview.textContent = emailData.body || "(Empty body)";
-        } else {
-          emailData.body = "";
-          preview.textContent = "(Body unavailable)";
-          preview.style.color = "#a19f9d";
-        }
+      // Remove style, script, head elements
+      tmp.querySelectorAll("style,script,head,meta,link").forEach(function(el){ el.remove(); });
+
+      // Replace block elements with newlines
+      tmp.querySelectorAll("p,div,br,tr,li,blockquote,h1,h2,h3,h4,h5,h6").forEach(function(el){
+        el.insertAdjacentText("afterend", "\n");
       });
+
+      // Get clean text — browser automatically decodes &amp; &nbsp; etc.
+      var text = tmp.innerText || tmp.textContent || "";
+
+      // Clean up excessive whitespace/blank lines
+      return text
+        .replace(/\r\n/g, "\n")
+        .replace(/[ \t]+/g, " ")
+        .replace(/\n[ \t]+/g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
     }
 
     item.body.getAsync(Office.CoercionType.Html, function(result) {
       if (result.status === Office.AsyncResultStatus.Succeeded && result.value) {
-        emailData.body = stripHtml(result.value);
+        emailData.body = cleanHtml(result.value);
         preview.textContent = emailData.body || "(Empty body)";
       } else {
-        // HTML failed, try plain text
-        tryTextBody();
+        // Fall back to plain text
+        item.body.getAsync(Office.CoercionType.Text, function(r2) {
+          if (r2.status === Office.AsyncResultStatus.Succeeded && r2.value) {
+            emailData.body = r2.value.trim();
+            preview.textContent = emailData.body || "(Empty body)";
+          } else {
+            emailData.body = "";
+            preview.textContent = "(Body unavailable)";
+            preview.style.color = "#a19f9d";
+          }
+        });
       }
     });
   }
