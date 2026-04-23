@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ticket Manager — Admin</title>
+  <style>
+    :root {
+      --blue:#0078d4;--blue-light:#deecf9;--blue-dark:#005a9e;
+      --green:#107c10;--green-light:#dff6dd;
+      --orange:#d83b01;--red:#a4262c;--red-light:#fde7e9;
+      --gray-50:#f8f8f8;--gray-100:#f3f2f1;--gray-200:#edebe9;
+      --gray-300:#d2d0ce;--gray-400:#a19f9d;--gray-600:#605e5c;--gray-900:#201f1e;
+      --radius:6px;--font:'Segoe UI',system-ui,sans-serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font);font-size:14px;color:var(--gray-900);background:var(--gray-50);min-height:100vh;}
+
+    /* Header */
+    .header{background:var(--blue);color:#fff;padding:0 32px;display:flex;align-items:center;gap:16px;height:56px;}
+    .header h1{font-size:18px;font-weight:600;}
+    .header span{font-size:13px;opacity:0.8;}
+    .api-status{margin-left:auto;font-size:12px;opacity:0.9;}
+
+    /* Nav tabs */
+    .nav{background:#fff;border-bottom:1px solid var(--gray-200);padding:0 32px;display:flex;gap:0;}
+    .nav-tab{padding:14px 20px;font-size:14px;font-weight:500;color:var(--gray-600);cursor:pointer;border-bottom:3px solid transparent;transition:all 0.15s;}
+    .nav-tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+    .nav-tab:hover:not(.active){background:var(--gray-50);}
+
+    /* Main */
+    .main{max-width:900px;margin:32px auto;padding:0 24px;}
+
+    /* Section */
+    .section{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius);margin-bottom:24px;overflow:hidden;}
+    .section-header{padding:16px 20px;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;}
+    .section-title{font-size:15px;font-weight:600;}
+    .section-body{padding:20px;}
+
+    /* Form */
+    .form-row{display:grid;gap:12px;margin-bottom:16px;}
+    .form-row.cols2{grid-template-columns:1fr 1fr;}
+    .form-row.cols3{grid-template-columns:1fr 1fr 1fr;}
+    .form-row.cols4{grid-template-columns:1fr 1fr 80px 80px;}
+    .field label{display:block;font-size:11px;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px;}
+    .field input,.field select{width:100%;padding:7px 10px;border:1px solid var(--gray-300);border-radius:var(--radius);font-family:var(--font);font-size:13px;color:var(--gray-900);}
+    .field input:focus,.field select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 1px var(--blue);}
+    .field input[type="color"]{padding:2px 4px;height:34px;cursor:pointer;}
+
+    /* Buttons */
+    .btn{padding:7px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.15s;}
+    .btn-primary{background:var(--blue);color:#fff;}
+    .btn-primary:hover{background:var(--blue-dark);}
+    .btn-danger{background:var(--red-light);color:var(--red);border:1px solid #f1c0c3;}
+    .btn-danger:hover{background:#f7c1c1;}
+    .btn-sm{padding:4px 10px;font-size:12px;}
+    .btn-ghost{background:none;color:var(--blue);border:1px solid var(--gray-300);}
+    .btn-ghost:hover{background:var(--blue-light);}
+
+    /* Table */
+    table{width:100%;border-collapse:collapse;}
+    th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;color:var(--gray-600);padding:8px 12px;text-align:left;border-bottom:2px solid var(--gray-200);}
+    td{padding:10px 12px;border-bottom:1px solid var(--gray-100);font-size:13px;vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:var(--gray-50);}
+
+    /* Avatar preview */
+    .avatar-preview{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;}
+
+    /* Badge */
+    .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;}
+    .badge-active{background:var(--green-light);color:var(--green);}
+    .badge-inactive{background:var(--gray-200);color:var(--gray-600);}
+
+    /* Toast */
+    .toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:var(--radius);font-size:13px;font-weight:500;display:none;align-items:center;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:999;}
+    .toast.success{background:#fff;border-left:4px solid var(--green);color:var(--gray-900);}
+    .toast.error{background:#fff;border-left:4px solid var(--red);color:var(--gray-900);}
+    .toast.show{display:flex;}
+
+    /* Edit inline */
+    .edit-input{padding:4px 8px;border:1px solid var(--blue);border-radius:4px;font-size:13px;width:100%;}
+    .actions{display:flex;gap:6px;}
+
+    /* Empty */
+    .empty{text-align:center;padding:32px;color:var(--gray-400);font-size:13px;}
+
+    /* Panel */
+    .panel{display:none;}
+    .panel.active{display:block;}
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>🎫</div>
+  <h1>Ticket Manager</h1>
+  <span>Admin Panel</span>
+  <div class="api-status" id="apiStatus">Connecting...</div>
+</div>
+
+<div class="nav">
+  <div class="nav-tab active" onclick="switchTab('agents')">👥 Agents</div>
+  <div class="nav-tab" onclick="switchTab('categories')">🏷️ Categories</div>
+</div>
+
+<div class="main">
+
+  <!-- ── AGENTS TAB ─────────────────────────────────────────── -->
+  <div class="panel active" id="tab-agents">
+
+    <!-- Add agent form -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Add New Agent</div>
+      </div>
+      <div class="section-body">
+        <div class="form-row cols4">
+          <div class="field">
+            <label>Full Name</label>
+            <input type="text" id="agentName" placeholder="John Smith"/>
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="text" id="agentEmail" placeholder="john@company.com"/>
+          </div>
+          <div class="field">
+            <label>Initials</label>
+            <input type="text" id="agentInitials" placeholder="JS" maxlength="5"/>
+          </div>
+          <div class="field">
+            <label>Color</label>
+            <input type="color" id="agentColor" value="#0078d4"/>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addAgent()">+ Add Agent</button>
+      </div>
+    </div>
+
+    <!-- Agent list -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Agents</div>
+        <button class="btn btn-ghost btn-sm" onclick="loadAgents()">↺ Refresh</button>
+      </div>
+      <div class="section-body" style="padding:0">
+        <table>
+          <thead>
+            <tr>
+              <th>Agent</th>
+              <th>Email</th>
+              <th>Initials</th>
+              <th>Color</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="agentTable">
+            <tr><td colspan="6" class="empty">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CATEGORIES TAB ─────────────────────────────────────── -->
+  <div class="panel" id="tab-categories">
+
+    <!-- Add category form -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Add New Category</div>
+      </div>
+      <div class="section-body">
+        <div class="form-row cols2">
+          <div class="field">
+            <label>Category Name</label>
+            <input type="text" id="catName" placeholder="e.g. Hardware, Software, HR..."/>
+          </div>
+          <div class="field">
+            <label>Sort Order</label>
+            <input type="number" id="catOrder" placeholder="0" value="0" min="0"/>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addCategory()">+ Add Category</button>
+      </div>
+    </div>
+
+    <!-- Category list -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Categories</div>
+        <button class="btn btn-ghost btn-sm" onclick="loadCategories()">↺ Refresh</button>
+      </div>
+      <div class="section-body" style="padding:0">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Sort Order</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="catTable">
+            <tr><td colspan="4" class="empty">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ⚙️ Change this to your server IP
+  const API_URL = "http://localhost:4000";
+
+  // ── Tab switching ───────────────────────────────────────────
+  function switchTab(name) {
+    document.querySelectorAll(".nav-tab").forEach((t, i) =>
+      t.classList.toggle("active", (i===0&&name==="agents")||(i===1&&name==="categories"))
+    );
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    document.getElementById("tab-"+name).classList.add("active");
+    if (name==="agents") loadAgents();
+    if (name==="categories") loadCategories();
+  }
+
+  // ── API health ──────────────────────────────────────────────
+  async function checkApi() {
+    try {
+      const r = await fetch(API_URL+"/health");
+      document.getElementById("apiStatus").textContent = r.ok ? "● Connected" : "⚠️ API error";
+    } catch { document.getElementById("apiStatus").textContent = "⚠️ API unreachable"; }
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // AGENTS
+  // ══════════════════════════════════════════════════════════
+
+  let agents = [];
+
+  async function loadAgents() {
+    try {
+      const res = await fetch(API_URL+"/agents/all");
+      agents = await res.json();
+      renderAgents();
+    } catch(err) {
+      document.getElementById("agentTable").innerHTML = `<tr><td colspan="6" class="empty">Error: ${err.message}</td></tr>`;
+    }
+  }
+
+  function renderAgents() {
+    const tbody = document.getElementById("agentTable");
+    if (!agents.length) { tbody.innerHTML = `<tr><td colspan="6" class="empty">No agents yet. Add one above.</td></tr>`; return; }
+    tbody.innerHTML = agents.map(a => `
+      <tr id="agent-row-${a.Id}">
+        <td>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="avatar-preview" style="background:${a.Color}">${a.Initials}</div>
+            <span id="agent-name-${a.Id}">${a.Name}</span>
+          </div>
+        </td>
+        <td id="agent-email-${a.Id}">${a.Email}</td>
+        <td>
+          <div class="avatar-preview" style="background:${a.Color};width:24px;height:24px;font-size:9px" id="agent-init-${a.Id}">${a.Initials}</div>
+        </td>
+        <td>
+          <input type="color" value="${a.Color}" id="agent-color-${a.Id}"
+            onchange="updateAgentColor(${a.Id}, this.value)"
+            style="width:32px;height:28px;padding:2px;border:1px solid var(--gray-300);border-radius:4px;cursor:pointer"/>
+        </td>
+        <td><span class="badge ${a.IsActive ? 'badge-active':'badge-inactive'}">${a.IsActive ? 'Active':'Inactive'}</span></td>
+        <td>
+          <div class="actions">
+            <button class="btn btn-ghost btn-sm" onclick="editAgent(${a.Id})">Edit</button>
+            ${a.IsActive
+              ? `<button class="btn btn-danger btn-sm" onclick="toggleAgent(${a.Id}, false)">Deactivate</button>`
+              : `<button class="btn btn-ghost btn-sm" onclick="toggleAgent(${a.Id}, true)">Reactivate</button>`
+            }
+          </div>
+        </td>
+      </tr>`).join("");
+  }
+
+  async function addAgent() {
+    const name     = document.getElementById("agentName").value.trim();
+    const email    = document.getElementById("agentEmail").value.trim();
+    const initials = document.getElementById("agentInitials").value.trim();
+    const color    = document.getElementById("agentColor").value;
+    if (!name || !email || !initials) { showToast("Please fill in name, email and initials.", "error"); return; }
+    try {
+      const res = await fetch(API_URL+"/agents", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ name, email, initials, color }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      showToast("Agent added successfully!", "success");
+      document.getElementById("agentName").value = "";
+      document.getElementById("agentEmail").value = "";
+      document.getElementById("agentInitials").value = "";
+      loadAgents();
+    } catch(err) { showToast("Error: "+err.message, "error"); }
+  }
+
+  function editAgent(id) {
+    const agent = agents.find(a => a.Id === id);
+    if (!agent) return;
+    const row = document.getElementById(`agent-row-${id}`);
+    row.innerHTML = `
+      <td colspan="4">
+        <div style="display:grid;grid-template-columns:1fr 1fr 80px 60px;gap:8px;align-items:center">
+          <input class="edit-input" id="edit-name-${id}" value="${agent.Name}" placeholder="Name"/>
+          <input class="edit-input" id="edit-email-${id}" value="${agent.Email}" placeholder="Email"/>
+          <input class="edit-input" id="edit-init-${id}" value="${agent.Initials}" placeholder="Initials" maxlength="5"/>
+          <input type="color" id="edit-color-${id}" value="${agent.Color}" style="height:34px;width:100%;padding:2px;border:1px solid var(--gray-300);border-radius:4px"/>
+        </div>
+      </td>
+      <td></td>
+      <td>
+        <div class="actions">
+          <button class="btn btn-primary btn-sm" onclick="saveAgent(${id})">Save</button>
+          <button class="btn btn-ghost btn-sm" onclick="renderAgents()">Cancel</button>
+        </div>
+      </td>`;
+  }
+
+  async function saveAgent(id) {
+    const name     = document.getElementById(`edit-name-${id}`).value.trim();
+    const email    = document.getElementById(`edit-email-${id}`).value.trim();
+    const initials = document.getElementById(`edit-init-${id}`).value.trim();
+    const color    = document.getElementById(`edit-color-${id}`).value;
+    try {
+      const res = await fetch(API_URL+"/agents/"+id, {
+        method:"PATCH", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ name, email, initials, color }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      showToast("Agent updated!", "success");
+      loadAgents();
+    } catch(err) { showToast("Error: "+err.message, "error"); }
+  }
+
+  async function updateAgentColor(id, color) {
+    try {
+      await fetch(API_URL+"/agents/"+id, {
+        method:"PATCH", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ color }),
+      });
+      loadAgents();
+    } catch(err) { showToast("Error: "+err.message, "error"); }
+  }
+
+  async function toggleAgent(id, active) {
+    try {
+      const res = await fetch(API_URL+"/agents/"+id, {
+        method:"PATCH", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ isActive: active }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      showToast(active ? "Agent reactivated!" : "Agent deactivated!", "success");
+      loadAgents();
+    } catch(err) { showToast("Error: "+err.message, "error"); }
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // CATEGORIES
+  // ══════════════════════════════════════════════════════════
+
+  let categories = [];
+
+  async function loadCategories() {
+    try {
+      const res = await fetch(API_URL+"/categories/all");
+      categories = await res.json();
+      renderCategories();
+    } catch(err) {
+      document.getElementById("catTable").innerHTML = `<tr><td colspan="4" class="empty">Error: ${err.message}</td></tr>`;
+    }
+  }
+
+  function renderCategories() {
+    const tbody = document.getElementById("catTable");
+    if (!categories.length) { tbody.innerHTML = `<tr><td colspan="4" class="empty">No categories yet.</td></tr>`; return; }
+    tbody.innerHTML = categories.map(c => `
+      <tr id="cat-row-${c.Id}">
+        <td><span id="cat-name-${c.Id}">${c.Name}</span></td>
+        <td><span id="cat-order-${c.Id}">${c.SortOrder}</span></td>
+        <td><span class="badge ${c.IsActive ? 'badge-active':'badge-inactive'}">${c.IsActive ? 'Active':'Inactive'}</span></td>
+        <td>
+          <div class="actions">
+            <button class="btn btn-ghost btn-sm" onclick="editCategory(${c.Id})">Edit</button>
+            ${c.IsActive
+              ? `<button class="btn btn-danger btn-sm" onclick="toggleCategory(${c.Id}, false)">Deactivate</button>`
+              : `<button class="btn btn-ghost btn-sm" onclick="toggleCategory(${c.Id}, true)">Reactivate</button>`
+            }
+          </div>
+        </td>
+      </tr>`).join("");
+  }
+
+  async function addCategory() {
+    const name      = document.getElementById("catName").value.trim();
+    const sortOrder = parseInt(document.getElementById("catOrder").value) || 0;
+    if (!name) { showToast("Please enter a category name.", "error"); return; }
+    try {
+      const res = await fetch(API_URL+"/categories", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ name, sortOrder }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      showToast("Category added!", "success");
+      document.getElementById("catName").value = "";
+      document.getElementById("catOrder").value = "0";
+      loadCategories();
+    } catch(err) { showToast("Error: "+err.message, "error"); }
+  }
+
+  function editCategory(id) {
+    const cat = categories.find(c => c.Id === id);
+    if (!cat) return;
+    const row = document.getElementById(`cat-row-${id}`);
+    row.innerHTML = `
+      <td><input class="edit-input" id="edit-cat-name-${id}" value="${cat.Name}"/></td>
+      <td><input class="edit-input" id="edit-cat-order-${id}" value="${cat.SortOrder}" type="number" style="width:80px"/></td>
+      <td></td>
+      <td>
+        <div class="actions">
+          <button class="btn btn-primary btn-sm" onclick="saveCategory(${id})">Save</button>
+          <button class="btn btn-ghost btn-sm" onclick="renderCategories()">Cancel</button>
+        </div>
+      </td>`;
+  }
+
+  async function saveCategory(id) {
+    const name      = document.getElementById(`edit-cat-name-${id}`).value.trim();
+    const sortOrder = parseInt(document.getElementById(`edit-cat-order-${id}`).value) || 0;
+    try {
+      const res = await fetch(API_URL+"/categories/"+id, {
+        method:"PATCH", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ name, sortOrder }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      showToast("Category updated!", "success");
+      loadCategories();
+    } catch(err) { showToast("Error: "+err.message, "error"); }
+  }
+
+  async function toggleCategory(id, active) {
+    try {
+      const res = await fetch(API_URL+"/categories/"+id, {
+        method:"PATCH", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ isActive: active }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      showToast(active ? "Category reactivated!" : "Category deactivated!", "success");
+      loadCategories();
+    } catch(err) { showToast("Error: "+err.message, "error"); }
+  }
+
+  // ── Toast ───────────────────────────────────────────────────
+  function showToast(msg, type) {
+    const el = document.getElementById("toast");
+    el.textContent = (type==="success" ? "✅ " : "❌ ") + msg;
+    el.className = `toast ${type} show`;
+    setTimeout(() => el.classList.remove("show"), 3500);
+  }
+
+  // ── Init ────────────────────────────────────────────────────
+  checkApi();
+  loadAgents();
+</script>
+</body>
+</html>

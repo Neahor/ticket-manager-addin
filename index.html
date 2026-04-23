@@ -7,8 +7,8 @@
   <title>Ticket Manager</title>
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
   <style>
-    html, body { background: #ffffff !important; color: #201f1e !important; color-scheme: light !important; }
-    :root {
+    html,body{background:#ffffff !important;color:#201f1e !important;color-scheme:light !important;}
+    :root{
       --blue:#0078d4;--blue-light:#deecf9;--blue-dark:#005a9e;
       --green:#107c10;--green-light:#dff6dd;
       --orange:#d83b01;--orange-light:#fed9cc;--purple:#7719aa;
@@ -17,7 +17,7 @@
       --radius:4px;--font:'Segoe UI',system-ui,sans-serif;
     }
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:var(--font);font-size:13px;color:#201f1e !important;background:#ffffff !important;}
+    body{font-family:var(--font);font-size:13px;}
     .header{background:var(--blue);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;}
     .header-icon{width:28px;height:28px;background:rgba(255,255,255,0.2);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:15px;}
     .header h1{font-size:14px;font-weight:600;}
@@ -38,31 +38,40 @@
     label{display:block;font-size:11px;font-weight:600;color:var(--gray-600);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.3px;}
     input[type="text"],select,textarea{width:100%;padding:6px 8px;border:1px solid var(--gray-300);border-radius:var(--radius);font-family:var(--font);font-size:12px;color:var(--gray-900);background:#fff;}
     input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 1px var(--blue);}
-    textarea{resize:vertical;min-height:70px;}
+    textarea{resize:vertical;min-height:60px;}
     .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
     .sender-box{background:var(--blue-light);border:1px solid #b3d6f0;border-radius:var(--radius);padding:8px 10px;margin-bottom:12px;font-size:11px;}
     .sender-box strong{color:var(--blue-dark);display:block;margin-bottom:2px;}
     .email-preview{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:8px 10px;font-size:11px;color:var(--gray-600);max-height:80px;overflow:hidden;line-height:1.5;}
     .assignees{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;padding-bottom:16px;}
-    .avatar{width:30px;height:30px;border-radius:50%;background:var(--blue);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid transparent;transition:all 0.1s;position:relative;}
-    .avatar:nth-child(2){background:var(--purple);}
-    .avatar:nth-child(3){background:var(--green);}
-    .avatar:nth-child(4){background:var(--orange);}
+    .avatar{width:30px;height:30px;border-radius:50%;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid transparent;transition:all 0.1s;position:relative;flex-shrink:0;}
     .avatar.selected{border-color:var(--gray-900);box-shadow:0 0 0 1px var(--gray-900);}
     .avatar-name{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--gray-600);white-space:nowrap;}
-    .btn-primary{width:100%;padding:9px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;transition:background 0.15s;}
+    .btn-primary{width:100%;padding:9px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;}
     .btn-primary:hover{background:var(--blue-dark);}
     .btn-primary:disabled{background:var(--gray-300);cursor:not-allowed;}
+    .btn-sm{padding:5px 10px;border-radius:var(--radius);font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--gray-300);background:#fff;color:var(--gray-900);}
+    .btn-sm:hover{background:var(--gray-100);}
+    .btn-sm-blue{background:var(--blue);color:#fff;border-color:var(--blue);}
+    .btn-sm-blue:hover{background:var(--blue-dark);}
+    .btn-sm-red{color:#a4262c;border-color:#f1c0c3;background:#fde7e9;}
+    .btn-sm-red:hover{background:#f7c1c1;}
     .toast{display:none;border-radius:var(--radius);padding:10px 12px;font-size:12px;margin-top:10px;align-items:center;gap:8px;}
     .toast.success{background:var(--green-light);border:1px solid #bad3b7;border-left:3px solid var(--green);color:#0a4d0a;}
     .toast.error{background:#fde7e9;border:1px solid #f1c0c3;border-left:3px solid #a4262c;color:#6b0f0f;}
     .toast.show{display:flex;}
+    .conflict-box{display:none;background:#fde7e9;border:1px solid #f1c0c3;border-left:3px solid #a4262c;border-radius:var(--radius);padding:10px 12px;margin-bottom:12px;font-size:12px;color:#6b0f0f;}
+    .conflict-box .conflict-title{font-weight:600;margin-bottom:6px;}
+    .conflict-actions{display:flex;gap:8px;margin-top:10px;}
+    .conflict-actions button{flex:1;padding:7px;border:none;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;}
+    .btn-conflict-update{background:#a4262c;color:#fff;}
+    .btn-conflict-dismiss{background:#fff;color:#6b0f0f;border:1px solid #f1c0c3 !important;}
     .search-row{display:flex;gap:6px;margin-bottom:8px;}
     .search-row input{flex:1;}
     .filter-row{display:flex;gap:6px;margin-bottom:10px;}
     .filter-row select{flex:1;font-size:11px;padding:4px 6px;}
     .ticket-list{display:flex;flex-direction:column;gap:6px;}
-    .ticket-card{border:1px solid var(--gray-200);border-radius:var(--radius);padding:10px 12px;cursor:pointer;transition:all 0.1s;}
+    .ticket-card{border:1px solid var(--gray-200);border-radius:var(--radius);padding:10px 12px;cursor:pointer;transition:all 0.1s;background:#fff;}
     .ticket-card:hover{border-color:var(--blue);background:var(--blue-light);}
     .ticket-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
     .ticket-id{font-size:11px;font-weight:700;color:var(--blue);}
@@ -71,16 +80,30 @@
     .detail-panel{display:none;}
     .detail-panel.show{display:block;}
     .back-btn{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--blue);cursor:pointer;margin-bottom:12px;background:none;border:none;padding:0;}
-    .detail-title{font-size:14px;font-weight:600;margin-bottom:4px;}
-    .detail-id{font-size:11px;color:var(--blue);font-weight:700;margin-bottom:10px;}
+    .detail-id{font-size:11px;color:var(--blue);font-weight:700;margin-bottom:4px;}
+    .detail-title{font-size:14px;font-weight:600;margin-bottom:10px;}
     .detail-row{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid var(--gray-100);align-items:center;}
     .detail-row span:first-child{color:var(--gray-600);min-width:70px;}
     .status-select{font-size:12px;padding:4px 6px;border:1px solid var(--gray-300);border-radius:var(--radius);}
+    .section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-400);margin:14px 0 8px;}
+
+    /* Comments */
+    .comment-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:10px;margin-bottom:8px;font-size:12px;}
+    .comment-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+    .comment-author{font-weight:600;color:var(--blue-dark);font-size:11px;}
+    .comment-date{font-size:10px;color:var(--gray-400);}
+    .comment-text{color:var(--gray-900);line-height:1.5;white-space:pre-wrap;}
+    .comment-actions{display:flex;gap:4px;margin-top:6px;}
+    .comment-input-row{display:flex;gap:6px;align-items:flex-start;margin-top:8px;}
+    .comment-input-row textarea{flex:1;min-height:50px;font-size:12px;}
+    .comment-input-row button{white-space:nowrap;padding:6px 10px;margin-top:0;}
+
+    /* Email body */
     .email-body-section{margin-top:12px;}
-    .email-body-section label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-400);display:block;margin-bottom:6px;}
     .email-body-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:10px;font-size:11px;color:var(--gray-600);max-height:150px;overflow-y:auto;line-height:1.6;white-space:pre-wrap;word-break:break-word;}
     .open-email-btn{display:flex;align-items:center;gap:6px;margin-top:8px;padding:8px 10px;background:var(--blue-light);border:1px solid #b3d6f0;border-radius:var(--radius);font-size:12px;font-weight:600;color:var(--blue-dark);cursor:pointer;width:100%;justify-content:center;}
     .open-email-btn:hover{background:#c7dff5;}
+
     .badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;}
     .badge-low{background:var(--green-light);color:var(--green);}
     .badge-medium{background:#fff4ce;color:#7a5c00;}
@@ -89,10 +112,8 @@
     .badge-open{background:var(--blue-light);color:var(--blue-dark);}
     .badge-inprogress{background:#fff4ce;color:#7a5c00;}
     .badge-resolved{background:var(--green-light);color:var(--green);}
-    .empty{text-align:center;padding:30px 16px;color:var(--gray-400);}
-    .empty-icon{font-size:32px;margin-bottom:8px;}
+    .empty{text-align:center;padding:24px;color:var(--gray-400);font-size:12px;}
     .loading{text-align:center;padding:20px;color:var(--gray-400);font-size:12px;}
-    .warn-box{background:#fff4ce;border:1px solid #f0d060;border-left:3px solid #d4a800;border-radius:var(--radius);padding:8px 10px;font-size:11px;color:#5c4400;margin-bottom:12px;}
   </style>
 </head>
 <body>
@@ -115,29 +136,28 @@
   <div class="tab" onclick="switchTab('tickets')">All Tickets</div>
 </div>
 
-<!-- CREATE PANEL -->
+<!-- ── CREATE PANEL ─────────────────────────────────────────── -->
 <div class="panel active" id="panel-create">
-  <div class="warn-box" id="warnBox" style="display:none">
-    ⚠️ Could not read email. Click <strong>↺ Reload</strong> above, or close and reopen the panel.
+
+  <div class="conflict-box" id="conflictBox">
+    <div class="conflict-title">⚠️ This email thread already has a ticket</div>
+    <div id="conflictMsg"></div>
+    <div class="conflict-actions">
+      <button class="btn-conflict-update" onclick="updateExistingBody()">Update Thread Body</button>
+      <button class="btn-conflict-dismiss" onclick="dismissConflict()">Dismiss</button>
+    </div>
   </div>
+
   <div class="sender-box" id="senderBox" style="display:none">
     <strong id="senderNameDisplay"></strong>
     <span id="senderEmailDisplay"></span>
   </div>
 
-  <!-- Conflict warning — shown when thread already exists -->
-  <div id="conflictBox" style="display:none;background:#fde7e9;border:1px solid #f1c0c3;border-left:3px solid #a4262c;border-radius:4px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#6b0f0f;">
-    <div style="font-weight:600;margin-bottom:6px;">⚠️ This email thread already has a ticket</div>
-    <div id="conflictMsg" style="margin-bottom:10px;"></div>
-    <div style="display:flex;gap:8px;">
-      <button onclick="updateExistingBody()" style="flex:1;padding:7px;background:#a4262c;color:#fff;border:none;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;">Update Thread Body</button>
-      <button onclick="dismissConflict()" style="flex:1;padding:7px;background:#fff;color:#6b0f0f;border:1px solid #f1c0c3;border-radius:4px;font-size:12px;cursor:pointer;">Dismiss</button>
-    </div>
-  </div>
   <div class="field">
     <label>Title</label>
     <input type="text" id="ticketTitle" placeholder="Brief description of the issue"/>
   </div>
+
   <div class="row2">
     <div class="field">
       <label>Priority</label>
@@ -150,37 +170,32 @@
     </div>
     <div class="field">
       <label>Category</label>
-      <select id="ticketCategory">
-        <option value="support">Support</option>
-        <option value="billing">Billing</option>
-        <option value="technical">Technical</option>
-        <option value="feature">Feature Request</option>
-        <option value="other">Other</option>
-      </select>
+      <select id="ticketCategory"><option>Loading...</option></select>
     </div>
   </div>
+
   <div class="field">
     <label>Email Preview</label>
     <div class="email-preview" id="emailPreview">Loading...</div>
   </div>
+
   <div class="field">
     <label>Assign To</label>
-    <div class="assignees">
-      <div class="avatar" title="Agent 1" onclick="toggleAssignee(this)">A1<span class="avatar-name">Agent 1</span></div>
-      <div class="avatar" title="Agent 2" onclick="toggleAssignee(this)">A2<span class="avatar-name">Agent 2</span></div>
-      <div class="avatar" title="Agent 3" onclick="toggleAssignee(this)">A3<span class="avatar-name">Agent 3</span></div>
-      <div class="avatar" title="Agent 4" onclick="toggleAssignee(this)">A4<span class="avatar-name">Agent 4</span></div>
+    <div class="assignees" id="assigneeList">
+      <div class="loading" style="padding:8px">Loading agents...</div>
     </div>
   </div>
+
   <div class="field" style="margin-top:8px">
     <label>Notes</label>
     <textarea id="ticketNotes" placeholder="Additional context or internal notes..."></textarea>
   </div>
+
   <button class="btn-primary" id="createBtn" onclick="createTicket()">Create Ticket</button>
   <div class="toast" id="toast"></div>
 </div>
 
-<!-- TICKETS PANEL -->
+<!-- ── TICKETS PANEL ────────────────────────────────────────── -->
 <div class="panel" id="panel-tickets">
   <div id="listView">
     <div class="search-row">
@@ -203,11 +218,14 @@
     </div>
     <div class="ticket-list" id="ticketList"><div class="loading">Loading tickets...</div></div>
   </div>
+
+  <!-- Detail view -->
   <div class="detail-panel" id="detailView">
     <button class="back-btn" onclick="showList()">← Back to tickets</button>
     <div class="detail-id" id="detailId"></div>
     <div class="detail-title" id="detailTitle"></div>
-    <div style="margin:10px 0 12px">
+
+    <div style="margin:0 0 12px">
       <label style="font-size:11px;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.3px;display:block;margin-bottom:4px">Status</label>
       <select class="status-select" id="detailStatus" onchange="updateStatus()">
         <option value="open">Open</option>
@@ -215,14 +233,27 @@
         <option value="resolved">Resolved</option>
       </select>
     </div>
+
     <div id="detailRows"></div>
+
+    <!-- Comments -->
+    <div class="section-label">Comments</div>
+    <div id="commentsList"><div class="loading">Loading comments...</div></div>
+
+    <div class="comment-input-row">
+      <textarea id="newComment" placeholder="Add a comment..."></textarea>
+      <button class="btn-sm btn-sm-blue" onclick="addComment()">Post</button>
+    </div>
+
+    <!-- Email body -->
     <div class="email-body-section" id="emailBodySection" style="display:none">
-      <label>Email Content</label>
+      <div class="section-label">Email Content</div>
       <div class="email-body-box" id="detailEmailBody"></div>
       <button class="open-email-btn" id="openEmailBtn" onclick="openOriginalEmail()">
         📧 Open Original Email in Outlook
       </button>
     </div>
+
     <div class="toast" id="detailToast" style="margin-top:10px"></div>
   </div>
 </div>
@@ -232,55 +263,59 @@
   const API_URL = "http://localhost:4000";
 
   let emailData = { subject:"", senderName:"", senderEmail:"", body:"", itemId:"", conversationId:"", date:"" };
+  let currentUser = { name:"", email:"" };
   let currentTicket = null;
   let retryCount = 0;
   const MAX_RETRIES = 10;
 
+  // ── Office.js init ──────────────────────────────────────────
   Office.onReady(function(info) {
     checkApi();
+    loadCategories();
+    loadAgents();
+
     if (info.host === Office.HostType.Outlook) {
+      // Get current user identity
+      var profile = Office.context.mailbox.userProfile;
+      if (profile) {
+        currentUser.name  = profile.displayName  || "";
+        currentUser.email = profile.emailAddress || "";
+      }
       tryLoadEmail();
     }
   });
 
-  // Keep retrying until item is available
   function tryLoadEmail() {
-    const item = Office.context.mailbox && Office.context.mailbox.item;
-    if (item) {
-      retryCount = 0;
-      loadEmailInfo(item);
-    } else if (retryCount < MAX_RETRIES) {
+    var item = Office.context.mailbox && Office.context.mailbox.item;
+    if (item) { retryCount=0; loadEmailInfo(item); }
+    else if (retryCount < MAX_RETRIES) {
       retryCount++;
-      document.getElementById("emailSubject").textContent = "Loading email... (" + retryCount + ")";
+      document.getElementById("emailSubject").textContent = "Loading email... ("+retryCount+")";
       setTimeout(tryLoadEmail, 500);
     } else {
-      // Give up — show warning and let user retry manually
       document.getElementById("emailSubject").textContent = "Could not load email";
       document.getElementById("emailPreview").textContent = "Click ↺ Reload to try again.";
-      document.getElementById("warnBox").style.display = "block";
     }
   }
 
   function retryLoad() {
-    retryCount = 0;
-    document.getElementById("warnBox").style.display = "none";
+    retryCount=0;
     document.getElementById("emailSubject").textContent = "Loading email...";
-    document.getElementById("emailPreview").textContent = "Loading..."; setTimeout(function(){ if(document.getElementById("emailPreview").textContent==="Loading..."){document.getElementById("emailPreview").textContent="(Body will be saved with ticket)"; emailData.body="";}},4000);
+    document.getElementById("emailPreview").textContent = "Loading...";
     document.getElementById("senderBox").style.display = "none";
     tryLoadEmail();
   }
 
   function loadEmailInfo(item) {
-    // Subject & metadata — all synchronous
-    emailData.subject = item.subject || "(No subject)";
-    emailData.date    = item.dateTimeCreated ? item.dateTimeCreated.toISOString() : new Date().toISOString();
-    emailData.itemId        = item.itemId        || "";
+    emailData.subject        = item.subject        || "(No subject)";
+    emailData.itemId         = item.itemId         || "";
     emailData.conversationId = item.conversationId || "";
+    emailData.date           = item.dateTimeCreated ? item.dateTimeCreated.toISOString() : new Date().toISOString();
 
     document.getElementById("emailSubject").textContent = emailData.subject;
     document.getElementById("ticketTitle").value        = emailData.subject;
 
-    // Read sender synchronously (available without getAsync in read mode)
+    // Sender — synchronous in read mode
     try {
       var from = item.from;
       if (from && from.emailAddress) {
@@ -288,82 +323,95 @@
         emailData.senderEmail = from.emailAddress || "";
         document.getElementById("senderNameDisplay").textContent  = emailData.senderName;
         document.getElementById("senderEmailDisplay").textContent = emailData.senderEmail;
-        document.getElementById("emailMeta").textContent = "From: " + (emailData.senderName ? emailData.senderName + " <" + emailData.senderEmail + ">" : emailData.senderEmail);
+        document.getElementById("emailMeta").textContent = "From: " + (emailData.senderName ? emailData.senderName+" <"+emailData.senderEmail+">" : emailData.senderEmail);
         document.getElementById("senderBox").style.display = "block";
       }
-    } catch(e) {
-      document.getElementById("emailMeta").textContent = "";
-    }
+    } catch(e) {}
 
-    // Body
-    // Load body — try HTML first, fall back to Text
-    const preview = document.getElementById("emailPreview");
-
-    function cleanHtml(html) {
-      // Use a temporary DOM element to properly decode HTML
-      var tmp = document.createElement("div");
-      tmp.innerHTML = html;
-
-      // Remove style, script, head elements
-      tmp.querySelectorAll("style,script,head,meta,link").forEach(function(el){ el.remove(); });
-
-      // Replace block elements with newlines
-      tmp.querySelectorAll("p,div,br,tr,li,blockquote,h1,h2,h3,h4,h5,h6").forEach(function(el){
-        el.insertAdjacentText("afterend", "\n");
+    // Body — HTML then Text fallback
+    var preview = document.getElementById("emailPreview");
+    function tryTextBody() {
+      item.body.getAsync(Office.CoercionType.Text, function(r) {
+        if (r.status===Office.AsyncResultStatus.Succeeded && r.value) {
+          emailData.body = r.value.trim();
+          preview.textContent = emailData.body || "(Empty body)";
+        } else {
+          emailData.body = "";
+          preview.textContent = "(Body unavailable)";
+        }
       });
-
-      // Get clean text — browser automatically decodes &amp; &nbsp; etc.
-      var text = tmp.innerText || tmp.textContent || "";
-
-      // Clean up excessive whitespace/blank lines
-      return text
-        .replace(/\r\n/g, "\n")
-        .replace(/[ \t]+/g, " ")
-        .replace(/\n[ \t]+/g, "\n")
-        .replace(/\n{3,}/g, "\n\n")
-        .trim();
     }
-
     item.body.getAsync(Office.CoercionType.Html, function(result) {
-      if (result.status === Office.AsyncResultStatus.Succeeded && result.value) {
+      if (result.status===Office.AsyncResultStatus.Succeeded && result.value) {
         emailData.body = cleanHtml(result.value);
         preview.textContent = emailData.body || "(Empty body)";
-      } else {
-        // Fall back to plain text
-        item.body.getAsync(Office.CoercionType.Text, function(r2) {
-          if (r2.status === Office.AsyncResultStatus.Succeeded && r2.value) {
-            emailData.body = r2.value.trim();
-            preview.textContent = emailData.body || "(Empty body)";
-          } else {
-            emailData.body = "";
-            preview.textContent = "(Body unavailable)";
-            preview.style.color = "#a19f9d";
-          }
-        });
-      }
+      } else { tryTextBody(); }
     });
   }
 
-  async function checkApi() {
+  function cleanHtml(html) {
+    var tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    tmp.querySelectorAll("style,script,head,meta,link").forEach(function(el){ el.remove(); });
+    tmp.querySelectorAll("p,div,br,tr,li,blockquote,h1,h2,h3,h4,h5,h6").forEach(function(el){
+      el.insertAdjacentText("afterend","\n");
+    });
+    return (tmp.innerText||tmp.textContent||"")
+      .replace(/\r\n/g,"\n").replace(/[ \t]+/g," ")
+      .replace(/\n[ \t]+/g,"\n").replace(/\n{3,}/g,"\n\n").trim();
+  }
+
+  // ── Load categories into select ─────────────────────────────
+  async function loadCategories() {
     try {
-      const r = await fetch(API_URL + "/health");
-      document.getElementById("apiStatus").textContent = r.ok ? "● Connected" : "⚠️ API error";
-    } catch {
-      document.getElementById("apiStatus").textContent = "⚠️ API unreachable";
+      const res = await fetch(API_URL+"/categories");
+      const cats = await res.json();
+      const sel  = document.getElementById("ticketCategory");
+      sel.innerHTML = cats.map(c=>`<option value="${c.Name}">${c.Name}</option>`).join("");
+    } catch(e) {
+      document.getElementById("ticketCategory").innerHTML = `<option>Support</option><option>Billing</option><option>Technical</option><option>Other</option>`;
     }
   }
 
+  // ── Load agents as avatars ──────────────────────────────────
+  async function loadAgents() {
+    try {
+      const res    = await fetch(API_URL+"/agents");
+      const agents = await res.json();
+      const list   = document.getElementById("assigneeList");
+      if (!agents.length) { list.innerHTML = `<div style="font-size:11px;color:var(--gray-400)">No agents configured. Add agents in the admin panel.</div>`; return; }
+      list.innerHTML = agents.map(a => `
+        <div class="avatar" title="${a.Name}" onclick="toggleAssignee(this)"
+          style="background:${a.Color}">
+          ${a.Initials}
+          <span class="avatar-name">${a.Name.split(" ")[0]}</span>
+        </div>`).join("");
+    } catch(e) {
+      document.getElementById("assigneeList").innerHTML = `<div style="font-size:11px;color:var(--gray-400)">Could not load agents.</div>`;
+    }
+  }
+
+  // ── API health ──────────────────────────────────────────────
+  async function checkApi() {
+    try {
+      const r = await fetch(API_URL+"/health");
+      document.getElementById("apiStatus").textContent = r.ok ? "● Connected" : "⚠️ API error";
+    } catch { document.getElementById("apiStatus").textContent = "⚠️ API unreachable"; }
+  }
+
+  // ── Tabs ────────────────────────────────────────────────────
   function switchTab(name) {
-    document.querySelectorAll(".tab").forEach((t,i) =>
+    document.querySelectorAll(".tab").forEach((t,i)=>
       t.classList.toggle("active",(i===0&&name==="create")||(i===1&&name==="tickets"))
     );
-    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
     document.getElementById("panel-"+name).classList.add("active");
     if (name==="tickets"){showList();loadTickets();}
   }
 
   function toggleAssignee(el){el.classList.toggle("selected");}
 
+  // ── Create ticket ───────────────────────────────────────────
   async function createTicket() {
     const title = document.getElementById("ticketTitle").value.trim();
     if (!title){showToast("toast","Please enter a title.","error");return;}
@@ -372,8 +420,7 @@
     btn.disabled=true; btn.textContent="Creating...";
     try {
       const res = await fetch(API_URL+"/tickets",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
+        method:"POST", headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
           title,
           senderName:     emailData.senderName,
@@ -391,29 +438,45 @@
       });
       const data = await res.json();
 
-      // Conflict — thread already has a ticket
-      if (res.status === 409 && data.conflict) {
+      if (res.status===409 && data.conflict) {
         window._conflictTicketId = data.ticketId;
         document.getElementById("conflictMsg").innerHTML =
           `Ticket <strong>${data.ticketNumber}</strong> — "${data.title}" (${data.status})<br>` +
-          `This is a reply/forward in the same thread. Do you want to update the email body with this latest message?`;
+          `This is a reply/forward in the same thread. Update the email body with this latest message?`;
         document.getElementById("conflictBox").style.display = "block";
         document.getElementById("conflictBox").scrollIntoView({behavior:"smooth"});
         return;
       }
-
       if (!res.ok) throw new Error(data.error||"Failed");
       document.getElementById("conflictBox").style.display = "none";
       showToast("toast","✅ "+data.ticketNumber+" created!","success");
       document.getElementById("ticketNotes").value="";
       document.querySelectorAll(".avatar.selected").forEach(a=>a.classList.remove("selected"));
-    } catch(err){
-      showToast("toast","❌ "+err.message,"error");
-    } finally {
-      btn.disabled=false; btn.textContent="Create Ticket";
-    }
+    } catch(err){ showToast("toast","❌ "+err.message,"error"); }
+    finally { btn.disabled=false; btn.textContent="Create Ticket"; }
   }
 
+  async function updateExistingBody() {
+    const id = window._conflictTicketId;
+    if (!id) return;
+    try {
+      const res = await fetch(API_URL+"/tickets/"+id+"/body",{
+        method:"PATCH", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ emailBody:emailData.body, emailId:emailData.itemId }),
+      });
+      if (!res.ok) throw new Error("Update failed");
+      document.getElementById("conflictBox").style.display="none";
+      showToast("toast","✅ Ticket updated with latest thread body!","success");
+      window._conflictTicketId=null;
+    } catch(err){ showToast("toast","❌ "+err.message,"error"); }
+  }
+
+  function dismissConflict(){
+    document.getElementById("conflictBox").style.display="none";
+    window._conflictTicketId=null;
+  }
+
+  // ── Ticket list ─────────────────────────────────────────────
   async function loadTickets() {
     const list=document.getElementById("ticketList");
     const params=new URLSearchParams();
@@ -427,7 +490,7 @@
     try {
       const res=await fetch(API_URL+"/tickets?"+params);
       const tickets=await res.json();
-      if(!tickets.length){list.innerHTML=`<div class="empty"><div class="empty-icon">🗂️</div><p>No tickets found.</p></div>`;return;}
+      if(!tickets.length){list.innerHTML=`<div class="empty">No tickets found.</div>`;return;}
       list.innerHTML=tickets.map(t=>`
         <div class="ticket-card" onclick="showDetail(${t.Id})">
           <div class="ticket-card-top"><span class="ticket-id">${t.TicketNumber}</span>${priorityBadge(t.Priority)}</div>
@@ -435,14 +498,14 @@
           <div class="ticket-meta">${statusBadge(t.Status)}<span>${t.Category}</span>${t.AssignedTo?`<span>· ${t.AssignedTo}</span>`:""}<span>· ${t.CreatedAt}</span></div>
           ${t.SenderEmail?`<div style="font-size:11px;color:var(--gray-400);margin-top:3px">${t.SenderEmail}</div>`:""}
         </div>`).join("");
-    } catch(err){
-      list.innerHTML=`<div class="empty"><div class="empty-icon">⚠️</div><p>${err.message}</p></div>`;
-    }
+    } catch(err){ list.innerHTML=`<div class="empty">⚠️ ${err.message}</div>`; }
   }
 
+  // ── Ticket detail ───────────────────────────────────────────
   async function showDetail(id) {
     document.getElementById("listView").style.display="none";
     document.getElementById("detailView").classList.add("show");
+    document.getElementById("commentsList").innerHTML=`<div class="loading">Loading...</div>`;
     try {
       const res=await fetch(API_URL+"/tickets/"+id);
       const t=await res.json();
@@ -456,70 +519,132 @@
         <div class="detail-row"><span>Category</span><span>${t.Category}</span></div>
         <div class="detail-row"><span>Assigned</span><span>${t.AssignedTo||"Unassigned"}</span></div>
         <div class="detail-row"><span>Date</span><span>${t.EmailDate||t.CreatedAt}</span></div>
-        <div class="detail-row"><span>Updated</span><span>${t.UpdatedAt}</span></div>
         ${t.Notes?`<div style="margin-top:8px;padding:8px;background:var(--gray-50);border-radius:var(--radius);font-size:12px;color:var(--gray-600)">${t.Notes}</div>`:""}
       `;
+
+      // Email body
       const bodySection=document.getElementById("emailBodySection");
       if(t.EmailBody){
         document.getElementById("detailEmailBody").textContent=t.EmailBody.trim();
         bodySection.style.display="block";
         document.getElementById("openEmailBtn").style.display=t.EmailId?"flex":"none";
-      } else {
-        bodySection.style.display="none";
-      }
+      } else { bodySection.style.display="none"; }
+
+      // Load comments
+      loadComments(id);
     } catch(err){
       document.getElementById("detailRows").innerHTML=`<p style="color:red;font-size:12px">${err.message}</p>`;
     }
   }
 
-  function openOriginalEmail() {
-    if(!currentTicket||!currentTicket.EmailId) return;
-    Office.context.mailbox.displayMessageForm(currentTicket.EmailId);
-  }
-
-  async function updateStatus() {
-    if(!currentTicket) return;
+  // ── Comments ────────────────────────────────────────────────
+  async function loadComments(ticketId) {
     try {
-      await fetch(API_URL+"/tickets/"+currentTicket.Id,{
-        method:"PATCH",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({status:document.getElementById("detailStatus").value}),
-      });
-      showToast("detailToast","✅ Status updated","success");
-    } catch(err){showToast("detailToast","❌ "+err.message,"error");}
-  }
+      const res      = await fetch(API_URL+"/tickets/"+ticketId+"/comments");
+      const comments = await res.json();
+      const list     = document.getElementById("commentsList");
 
-  async function updateExistingBody() {
-    const id = window._conflictTicketId;
-    if (!id) return;
-    const btn = document.querySelector("#conflictBox button");
-    btn.textContent = "Updating..."; btn.disabled = true;
-    try {
-      const res = await fetch(API_URL+"/tickets/"+id+"/body", {
-        method:"PATCH",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ emailBody: emailData.body, emailId: emailData.itemId }),
-      });
-      if (!res.ok) throw new Error("Update failed");
-      document.getElementById("conflictBox").style.display = "none";
-      showToast("toast","✅ Ticket updated with latest thread body!","success");
-      window._conflictTicketId = null;
+      if (!comments.length) {
+        list.innerHTML = `<div class="empty" style="padding:12px">No comments yet.</div>`;
+        return;
+      }
+
+      list.innerHTML = comments.map(c => {
+        const isOwn = currentUser.email && c.AuthorEmail.toLowerCase()===currentUser.email.toLowerCase();
+        return `
+          <div class="comment-box" id="comment-${c.Id}">
+            <div class="comment-header">
+              <span class="comment-author">${c.AuthorName||c.AuthorEmail}</span>
+              <span class="comment-date">${c.CreatedAt}${c.UpdatedAt!==c.CreatedAt?" (edited)":""}</span>
+            </div>
+            <div class="comment-text" id="comment-text-${c.Id}">${escHtml(c.Comment)}</div>
+            ${isOwn ? `
+              <div class="comment-actions">
+                <button class="btn-sm" onclick="editComment(${c.Id}, '${escAttr(c.Comment)}')">Edit</button>
+                <button class="btn-sm btn-sm-red" onclick="deleteComment(${c.Id})">Delete</button>
+              </div>` : ""}
+          </div>`;
+      }).join("");
     } catch(err) {
-      showToast("toast","❌ "+err.message,"error");
-    } finally {
-      btn.textContent="Update Thread Body"; btn.disabled=false;
+      document.getElementById("commentsList").innerHTML=`<div class="empty">⚠️ ${err.message}</div>`;
     }
   }
 
-  function dismissConflict() {
-    document.getElementById("conflictBox").style.display = "none";
-    window._conflictTicketId = null;
+  async function addComment() {
+    const text = document.getElementById("newComment").value.trim();
+    if (!text) return;
+    if (!currentUser.email) { showToast("detailToast","Could not identify your Outlook account.","error"); return; }
+    try {
+      const res = await fetch(API_URL+"/tickets/"+currentTicket.Id+"/comments",{
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ authorName:currentUser.name, authorEmail:currentUser.email, comment:text }),
+      });
+      if (!res.ok) { const d=await res.json(); throw new Error(d.error); }
+      document.getElementById("newComment").value="";
+      loadComments(currentTicket.Id);
+    } catch(err){ showToast("detailToast","❌ "+err.message,"error"); }
+  }
+
+  function editComment(id, originalText) {
+    const box = document.getElementById("comment-"+id);
+    const textEl = document.getElementById("comment-text-"+id);
+    textEl.innerHTML = `<textarea class="edit-comment-ta" style="width:100%;min-height:60px;font-size:12px;padding:6px;border:1px solid var(--blue);border-radius:var(--radius)">${escHtml(originalText)}</textarea>
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <button class="btn-sm btn-sm-blue" onclick="saveComment(${id})">Save</button>
+        <button class="btn-sm" onclick="loadComments(${currentTicket.Id})">Cancel</button>
+      </div>`;
+  }
+
+  async function saveComment(id) {
+    const ta = document.querySelector(`#comment-${id} .edit-comment-ta`);
+    const text = ta ? ta.value.trim() : "";
+    if (!text) return;
+    try {
+      const res = await fetch(API_URL+"/comments/"+id,{
+        method:"PATCH", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ comment:text, authorEmail:currentUser.email }),
+      });
+      if (!res.ok) { const d=await res.json(); throw new Error(d.error); }
+      loadComments(currentTicket.Id);
+    } catch(err){ showToast("detailToast","❌ "+err.message,"error"); }
+  }
+
+  async function deleteComment(id) {
+    if (!confirm("Delete this comment?")) return;
+    try {
+      const res = await fetch(API_URL+"/comments/"+id,{
+        method:"DELETE", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ authorEmail:currentUser.email }),
+      });
+      if (!res.ok) { const d=await res.json(); throw new Error(d.error); }
+      loadComments(currentTicket.Id);
+    } catch(err){ showToast("detailToast","❌ "+err.message,"error"); }
+  }
+
+  async function updateStatus() {
+    if (!currentTicket) return;
+    try {
+      await fetch(API_URL+"/tickets/"+currentTicket.Id,{
+        method:"PATCH", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({status:document.getElementById("detailStatus").value}),
+      });
+      showToast("detailToast","✅ Status updated","success");
+    } catch(err){ showToast("detailToast","❌ "+err.message,"error"); }
+  }
+
+  function openOriginalEmail() {
+    if (!currentTicket||!currentTicket.EmailId) return;
+    Office.context.mailbox.displayMessageForm(currentTicket.EmailId);
   }
 
   function showList(){currentTicket=null;document.getElementById("listView").style.display="block";document.getElementById("detailView").classList.remove("show");}
+
+  // ── Helpers ─────────────────────────────────────────────────
   function priorityBadge(p){const m={low:"badge-low",medium:"badge-medium",high:"badge-high",critical:"badge-critical"};return`<span class="badge ${m[p]||""}">${p}</span>`;}
   function statusBadge(s){const m={open:"badge-open",inprogress:"badge-inprogress",resolved:"badge-resolved"};const l={open:"Open",inprogress:"In Progress",resolved:"Resolved"};return`<span class="badge ${m[s]||""}">${l[s]||s}</span>`;}
   function showToast(id,msg,type){const el=document.getElementById(id);el.textContent=msg;el.className=`toast ${type} show`;setTimeout(()=>el.classList.remove("show"),4000);}
+  function escHtml(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+  function escAttr(s){return String(s).replace(/'/g,"\\'").replace(/\n/g,"\\n");}
 </script>
 </body>
 </html>
