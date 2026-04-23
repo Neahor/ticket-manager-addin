@@ -271,7 +271,9 @@
     </div>
 
     <!-- Email cards -->
-    <div id="emailCardsSection" style="display:none">
+
+    <!-- Email cards -->
+    <div id="emailCardsSection" style="display:none;margin-top:4px">
       <div class="section-label">Emails <span id="emailCount" style="color:var(--gray-400);font-weight:400"></span></div>
       <div class="email-cards" id="emailCardsList"></div>
     </div>
@@ -645,11 +647,16 @@
 
   async function updateStatus() {
     if (!currentTicket) return;
+    const newStatus = document.getElementById("detailStatus").value;
     try {
       await fetch(API_URL+"/tickets/"+currentTicket.Id,{
         method:"PATCH", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({status:document.getElementById("detailStatus").value}),
+        body:JSON.stringify({status: newStatus}),
       });
+      // Update cached ticket so list reflects change when going back
+      currentTicket.Status = newStatus;
+      // Refresh the ticket list in background so it's up to date
+      loadTickets();
       showToast("detailToast","✅ Status updated","success");
     } catch(err){ showToast("detailToast","❌ "+err.message,"error"); }
   }
