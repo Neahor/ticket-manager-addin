@@ -114,6 +114,26 @@
     .badge-resolved{background:var(--green-light);color:var(--green);}
     .empty{text-align:center;padding:24px;color:var(--gray-400);font-size:12px;}
     .loading{text-align:center;padding:20px;color:var(--gray-400);font-size:12px;}
+
+    /* Email cards */
+    .email-cards{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+    .email-card{border:1px solid var(--gray-200);border-radius:6px;overflow:hidden;background:#fff;cursor:pointer;transition:border-color 0.15s;}
+    .email-card:hover{border-color:var(--blue);}
+    .email-card.newest{border-color:#b3d6f0;background:var(--blue-light);}
+    .email-card-header{padding:10px 12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+    .email-card-sender{flex:1;min-width:0;}
+    .email-card-name{font-size:12px;font-weight:600;color:var(--gray-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .email-card-addr{font-size:10px;color:var(--gray-400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .email-card-time{font-size:11px;font-weight:600;color:var(--blue-dark);white-space:nowrap;flex-shrink:0;}
+    .email-card.newest .email-card-time{font-weight:700;}
+    .email-card-preview{padding:0 12px 10px;font-size:11px;color:var(--gray-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .email-card-body{display:none;padding:10px 12px;border-top:1px solid var(--gray-200);font-size:11px;color:var(--gray-600);white-space:pre-wrap;word-break:break-word;line-height:1.6;max-height:200px;overflow-y:auto;background:var(--gray-50);}
+    .email-card-body.open{display:block;}
+    .email-card-footer{display:none;padding:6px 12px 10px;border-top:1px solid var(--gray-100);}
+    .email-card-footer.open{display:flex;justify-content:flex-end;}
+    .open-orig-btn{font-size:11px;font-weight:600;color:var(--blue);background:none;border:none;cursor:pointer;padding:0;}
+    .open-orig-btn:hover{text-decoration:underline;}
+    .new-badge{display:inline-block;background:var(--blue);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:5px;vertical-align:middle;}
   </style>
 </head>
 <body>
@@ -121,7 +141,7 @@
 <div class="header">
   <div class="header-icon">🎫</div>
   <div><h1>Ticket Manager</h1><p id="apiStatus">Connecting...</p></div>
-    <a href="https://neahor.github.io/ticket-manager-addin/admin.html" target="_blank"
+  <a href="https://neahor.github.io/ticket-manager-addin/admin.html" target="_blank"
      style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.8);text-decoration:none;
             border:1px solid rgba(255,255,255,0.3);border-radius:4px;padding:4px 8px;white-space:nowrap;">
     ⚙️ Admin
@@ -250,13 +270,10 @@
       <button class="btn-sm btn-sm-blue" onclick="addComment()">Post</button>
     </div>
 
-    <!-- Email body -->
-    <div class="email-body-section" id="emailBodySection" style="display:none">
-      <div class="section-label">Email Content</div>
-      <div class="email-body-box" id="detailEmailBody"></div>
-      <button class="open-email-btn" id="openEmailBtn" onclick="openOriginalEmail()">
-        📧 Open Original Email in Outlook
-      </button>
+    <!-- Email cards -->
+    <div id="emailCardsSection" style="display:none">
+      <div class="section-label">Emails <span id="emailCount" style="color:var(--gray-400);font-weight:400"></span></div>
+      <div class="email-cards" id="emailCardsList"></div>
     </div>
 
     <div class="toast" id="detailToast" style="margin-top:10px"></div>
@@ -465,13 +482,20 @@
     const id = window._conflictTicketId;
     if (!id) return;
     try {
-      const res = await fetch(API_URL+"/tickets/"+id+"/body",{
-        method:"PATCH", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ emailBody:emailData.body, emailId:emailData.itemId }),
+      const res = await fetch(API_URL+"/tickets/"+id+"/emails",{
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          senderName:   emailData.senderName,
+          senderEmail:  emailData.senderEmail,
+          emailSubject: emailData.subject,
+          emailBody:    emailData.body,
+          emailId:      emailData.itemId,
+          receivedAt:   emailData.date,
+        }),
       });
       if (!res.ok) throw new Error("Update failed");
       document.getElementById("conflictBox").style.display="none";
-      showToast("toast","✅ Ticket updated with latest thread body!","success");
+      showToast("toast","✅ Email added to ticket!","success");
       window._conflictTicketId=null;
     } catch(err){ showToast("toast","❌ "+err.message,"error"); }
   }
@@ -527,15 +551,8 @@
         ${t.Notes?`<div style="margin-top:8px;padding:8px;background:var(--gray-50);border-radius:var(--radius);font-size:12px;color:var(--gray-600)">${t.Notes}</div>`:""}
       `;
 
-      // Email body
-      const bodySection=document.getElementById("emailBodySection");
-      if(t.EmailBody){
-        document.getElementById("detailEmailBody").textContent=t.EmailBody.trim();
-        bodySection.style.display="block";
-        document.getElementById("openEmailBtn").style.display=t.EmailId?"flex":"none";
-      } else { bodySection.style.display="none"; }
-
-      // Load comments
+      // Load emails and comments
+      loadTicketEmails(id);
       loadComments(id);
     } catch(err){
       document.getElementById("detailRows").innerHTML=`<p style="color:red;font-size:12px">${err.message}</p>`;
@@ -637,9 +654,65 @@
     } catch(err){ showToast("detailToast","❌ "+err.message,"error"); }
   }
 
+  function openEmailInOutlook(emailId) {
+    if (!emailId) return;
+    Office.context.mailbox.displayMessageForm(emailId);
+  }
+
+  // kept for compat
   function openOriginalEmail() {
     if (!currentTicket||!currentTicket.EmailId) return;
     Office.context.mailbox.displayMessageForm(currentTicket.EmailId);
+  }
+
+  // ── Load email cards ──────────────────────────────────────
+  async function loadTicketEmails(ticketId) {
+    const section = document.getElementById("emailCardsSection");
+    const list    = document.getElementById("emailCardsList");
+    const count   = document.getElementById("emailCount");
+    try {
+      const res    = await fetch(API_URL+"/tickets/"+ticketId+"/emails");
+      const emails = await res.json();
+      if (!emails.length) { section.style.display="none"; return; }
+      section.style.display="block";
+      count.textContent = "("+emails.length+")";
+      list.innerHTML = emails.map((e, i) => {
+        const isNewest = i===0;
+        const preview  = (e.EmailBody||"").replace(/\n/g," ").trim().substring(0,120);
+        const initials = (e.SenderName||e.SenderEmail||"?").split(" ").map(w=>w[0]).join("").substring(0,2).toUpperCase();
+        return `
+          <div class="email-card${isNewest?" newest":""}" onclick="toggleEmailCard(${e.Id})">
+            <div class="email-card-header">
+              <div class="email-card-sender">
+                <div class="email-card-name">
+                  ${escHtml(e.SenderName||e.SenderEmail||"Unknown")}
+                  ${isNewest?'<span class="new-badge">LATEST</span>':""}
+                </div>
+                <div class="email-card-addr">${escHtml(e.SenderEmail||"")}</div>
+              </div>
+              <div class="email-card-time">${e.ReceivedAt||""}</div>
+            </div>
+            <div class="email-card-preview" id="preview-${e.Id}">${escHtml(preview)}${preview.length>=120?"…":""}</div>
+            <div class="email-card-body" id="body-${e.Id}">${escHtml(e.EmailBody||"(No body)")}</div>
+            <div class="email-card-footer" id="footer-${e.Id}">
+              ${e.EmailId?`<button class="open-orig-btn" onclick="event.stopPropagation();openEmailInOutlook('${e.EmailId}')">📧 Open in Outlook</button>`:""}
+            </div>
+          </div>`;
+      }).join("");
+    } catch(err) {
+      section.style.display="none";
+      console.error("loadTicketEmails:", err);
+    }
+  }
+
+  function toggleEmailCard(id) {
+    const body    = document.getElementById("body-"+id);
+    const footer  = document.getElementById("footer-"+id);
+    const preview = document.getElementById("preview-"+id);
+    const isOpen  = body.classList.contains("open");
+    body.classList.toggle("open", !isOpen);
+    footer.classList.toggle("open", !isOpen);
+    preview.style.display = isOpen ? "" : "none";
   }
 
   function showList(){currentTicket=null;document.getElementById("listView").style.display="block";document.getElementById("detailView").classList.remove("show");}
